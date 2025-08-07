@@ -1,4 +1,11 @@
-import { supabase } from './supabase';
+import { supabase, supabaseAdmin } from './supabase';
+
+// Auth user'dan student ID'yi alma fonksiyonu
+export async function getStudentIdFromAuthUser(authUserId: string): Promise<{ studentId: string; error: null }> {
+  // Öğrenci giriş sisteminde student.id doğrudan auth store'da user.id olarak saklanıyor
+  // Bu nedenle auth user'ın id'sini direkt student_id olarak kullanıyoruz
+  return { studentId: authUserId, error: null };
+}
 
 export interface TYTExamData {
   examName: string;
@@ -20,24 +27,16 @@ export interface StudentExam {
   id: string;
   student_id: string;
   exam_type: 'TYT' | 'AYT' | 'LGS';
-  exam_name: string;
   exam_date: string;
-  turkce_correct?: number;
-  turkce_wrong?: number;
-  matematik_correct?: number;
-  matematik_wrong?: number;
-  fen_correct?: number;
-  fen_wrong?: number;
-  sosyal_correct?: number;
-  sosyal_wrong?: number;
-  subject_name?: string;
-  correct_answers?: number;
-  wrong_answers?: number;
-  blank_answers?: number;
-  total_correct: number;
-  total_wrong: number;
-  total_net: number;
+  total_questions: number;
+  correct_answers: number;
+  wrong_answers: number;
+  empty_answers: number;
+  score: number;
+  net_score: number;
+  subject_scores: any;
   created_at: string;
+  updated_at: string;
 }
 
 // TYT denemesi kaydetme
@@ -54,25 +53,32 @@ export const saveTYTExam = async (studentId: string, examData: TYTExamData) => {
 
     const totalCorrect = turkceCorrect + matematikCorrect + fenCorrect + sosyalCorrect;
     const totalWrong = turkceWrong + matematikWrong + fenWrong + sosyalWrong;
-    const totalNet = totalCorrect - (totalWrong / 4);
+    const totalQuestions = 120; // TYT toplam soru sayısı
+    const emptyAnswers = totalQuestions - totalCorrect - totalWrong;
+    const netScore = totalCorrect - (totalWrong * 0.25);
+    const score = (netScore / totalQuestions) * 100;
 
-    const { data, error } = await supabase
+    const subjectScores = {
+      examName: examData.examName,
+      turkce: { correct: turkceCorrect, wrong: turkceWrong },
+      matematik: { correct: matematikCorrect, wrong: matematikWrong },
+      fen: { correct: fenCorrect, wrong: fenWrong },
+      sosyal: { correct: sosyalCorrect, wrong: sosyalWrong }
+    };
+
+    const { data, error } = await supabaseAdmin
       .from('student_exams')
       .insert({
         student_id: studentId,
         exam_type: 'TYT',
-        exam_name: examData.examName,
-        turkce_correct: turkceCorrect,
-        turkce_wrong: turkceWrong,
-        matematik_correct: matematikCorrect,
-        matematik_wrong: matematikWrong,
-        fen_correct: fenCorrect,
-        fen_wrong: fenWrong,
-        sosyal_correct: sosyalCorrect,
-        sosyal_wrong: sosyalWrong,
-        total_correct: totalCorrect,
-        total_wrong: totalWrong,
-        total_net: totalNet
+        exam_date: new Date().toISOString().split('T')[0],
+        total_questions: totalQuestions,
+        correct_answers: totalCorrect,
+        wrong_answers: totalWrong,
+        empty_answers: emptyAnswers,
+        score: score,
+        net_score: netScore,
+        subject_scores: subjectScores
       })
       .select()
       .single();
@@ -95,21 +101,31 @@ export const saveSingleSubjectExam = async (
     const correct = parseInt(examData.correct) || 0;
     const wrong = parseInt(examData.wrong) || 0;
     const blank = parseInt(examData.blank) || 0;
-    const net = correct - (wrong / 4);
+    const totalQuestions = correct + wrong + blank;
+    const netScore = correct - (wrong * 0.25);
+    const score = totalQuestions > 0 ? (netScore / totalQuestions) * 100 : 0;
 
-    const { data, error } = await supabase
+    const subjectScores = {
+      examName: examData.examName,
+      subject: examData.subject,
+      correct: correct,
+      wrong: wrong,
+      blank: blank
+    };
+
+    const { data, error } = await supabaseAdmin
       .from('student_exams')
       .insert({
         student_id: studentId,
         exam_type: examType,
-        exam_name: examData.examName,
-        subject_name: examData.subject,
+        exam_date: new Date().toISOString().split('T')[0],
+        total_questions: totalQuestions,
         correct_answers: correct,
         wrong_answers: wrong,
-        blank_answers: blank,
-        total_correct: correct,
-        total_wrong: wrong,
-        total_net: net
+        empty_answers: blank,
+        score: score,
+        net_score: netScore,
+        subject_scores: subjectScores
       })
       .select()
       .single();
@@ -125,7 +141,7 @@ export const saveSingleSubjectExam = async (
 // Öğrencinin denemelerini getirme
 export const getStudentExams = async (studentId: string) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('student_exams')
       .select('*')
       .eq('student_id', studentId)
@@ -142,7 +158,7 @@ export const getStudentExams = async (studentId: string) => {
 // Deneme silme
 export const deleteStudentExam = async (examId: string) => {
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('student_exams')
       .delete()
       .eq('id', examId);
@@ -158,7 +174,7 @@ export const deleteStudentExam = async (examId: string) => {
 // Deneme türüne göre istatistikler
 export const getExamStatistics = async (studentId: string, examType?: 'TYT' | 'AYT' | 'LGS') => {
   try {
-    let query = supabase
+    let query = supabaseAdmin
       .from('student_exams')
       .select('*')
       .eq('student_id', studentId);
@@ -174,10 +190,10 @@ export const getExamStatistics = async (studentId: string, examType?: 'TYT' | 'A
     // İstatistikleri hesapla
     const stats = {
       totalExams: data?.length || 0,
-      averageNet: data?.length ? (data.reduce((sum, exam) => sum + exam.total_net, 0) / data.length).toFixed(2) : '0',
-      bestNet: data?.length ? Math.max(...data.map(exam => exam.total_net)).toFixed(2) : '0',
-      latestNet: data?.length ? data[0].total_net.toFixed(2) : '0',
-      improvement: data?.length >= 2 ? (data[0].total_net - data[1].total_net).toFixed(2) : '0'
+      averageNet: data?.length ? (data.reduce((sum, exam) => sum + exam.net_score, 0) / data.length).toFixed(2) : '0',
+      bestNet: data?.length ? Math.max(...data.map(exam => exam.net_score)).toFixed(2) : '0',
+      latestNet: data?.length ? data[0].net_score.toFixed(2) : '0',
+      improvement: data?.length >= 2 ? (data[0].net_score - data[data.length - 1].net_score).toFixed(2) : '0'
     };
 
     return { data, stats, error: null };

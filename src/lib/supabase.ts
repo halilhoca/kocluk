@@ -57,29 +57,17 @@ export async function getCurrentUser() {
 }
 
 export async function getStudents(userId: string) {
-  console.log('getStudents called with userId:', userId);
-  console.log('Service role key exists:', !!supabaseServiceRoleKey);
-  
   // Use supabaseAdmin to bypass RLS
   const { data, error } = await supabaseAdmin
     .from('students')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
-  
-  console.log('getStudents result:', { data, error });
-  
-  // If service role fails, try without user filter as fallback
-  if (error && error.message.includes('401')) {
-    console.log('Service role failed, trying without filter...');
-    const { data: fallbackData, error: fallbackError } = await supabaseAdmin
-      .from('students')
-      .select('*')
-      .order('created_at', { ascending: false });
-    console.log('Fallback result:', { data: fallbackData, error: fallbackError });
-    return { data: fallbackData, error: fallbackError };
+
+  if (error) {
+    console.error('Error fetching students:', error);
   }
-  
+
   return { data, error };
 }
 
@@ -168,8 +156,6 @@ export async function createStudent(
 }
 
 export async function updateStudentPassword(studentId: string, newPassword: string) {
-  console.log('updateStudentPassword called with:', { studentId, newPassword });
-  
   const { data, error } = await supabaseAdmin
     .from('students')
     .update({ 
@@ -180,22 +166,16 @@ export async function updateStudentPassword(studentId: string, newPassword: stri
     .select()
     .single();
 
-  console.log('updateStudentPassword result:', { data, error });
-  
   return { data, error };
 }
 
 export async function getStudentByEmail(email: string) {
-  console.log('getStudentByEmail called with email:', email);
-  
   const { data, error } = await supabaseAdmin
     .from('students')
     .select('*')
     .eq('email', email)
     .single();
 
-  console.log('getStudentByEmail result:', { data, error });
-  
   return { data, error };
 }
 

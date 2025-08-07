@@ -10,9 +10,11 @@ import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import StudentList from './pages/students/StudentList';
 import StudentDetail from './pages/students/StudentDetail';
-import StudentDashboard from './pages/student/StudentDashboard';
+
 import StudentWelcome from './pages/student/StudentWelcome';
+import StudentAssignments from './pages/student/StudentAssignments';
 import StudentExams from './pages/student/StudentExams';
+import QuestionStats from './pages/student/QuestionStats';
 import PublicReport from './pages/student/PublicReport';
 import BookList from './pages/books/BookList';
 import ProgramList from './pages/programs/ProgramList';
@@ -23,10 +25,15 @@ import ProgramView from './pages/student/ProgramView';
 
 function App() {
   const { user, initialized, initialize } = useAuthStore();
-  
+
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    const unsubscribe = initialize();
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
   
   if (!initialized) {
     return (
@@ -64,8 +71,9 @@ function App() {
         {/* Protected routes under StudentLayout (Student) */}
         <Route element={user ? <StudentLayout /> : <Navigate to="/student-signin" />}>
           <Route path="/student/welcome" element={<StudentWelcome />} />
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/assignments" element={<StudentAssignments />} />
           <Route path="/student/exams" element={<StudentExams />} />
+          <Route path="/student/question-stats" element={<QuestionStats />} />
         </Route>
         
         {/* Catch-all route */}

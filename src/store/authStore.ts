@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { User } from '../types';
-import { getCurrentUser, signIn, signOut, signUp } from '../lib/supabase';
+import { supabase, signIn, signOut, signUp } from '../lib/supabase';
 
 interface AuthState {
   user: User | null;
@@ -10,49 +10,40 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  initialize: () => Promise<void>;
+  initialize: () => () => void;
   setUser: (user: User) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  loading: false,
+  loading: true,
   error: null,
   initialized: false,
-  
-  initialize: async () => {
-    set({ loading: true });
-    try {
-      const { user, error } = await getCurrentUser();
-      
-      if (error) {
-        set({ error: error.message, loading: false, initialized: true });
-        return;
-      }
-      
-      if (user) {
-        set({ 
-          user: { 
-            id: user.id, 
-            email: user.email || '',
-            name: user.user_metadata?.name
-          }, 
-          loading: false,
-          initialized: true 
-        });
-      } else {
-        set({ user: null, loading: false, initialized: true });
-      }
-    } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'An unexpected error occurred', 
-        loading: false,
-        initialized: true 
+
+  initialize: () => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user ?? null;
+      set(state => {
+        const userObject = user ? { id: user.id, email: user.email || '', name: user.user_metadata?.name } : null;
+        // Only update initialized and loading on the first call
+        if (!state.initialized) {
+          return {
+            user: userObject,
+            initialized: true,
+            loading: false
+          };
+        }
+        // For subsequent calls, just update the user
+        return { user: userObject };
       });
-    }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   },
-  
-  login: async (email, password) => {
+
+    login: async (email, password) => {
     set({ loading: true, error: null });
     try {
       const { data, error } = await signIn(email, password);
@@ -123,5 +114,5 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => {
     set({ user });
-  }
+    }
 }));

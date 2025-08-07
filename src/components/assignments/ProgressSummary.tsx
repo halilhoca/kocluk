@@ -81,52 +81,52 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
           {showDetails && (
           <div className="grid grid-cols-3 gap-2 mt-3">
             <div 
-              className={`flex flex-col items-center p-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                onFilterChange ? 'hover:bg-green-100' : 'bg-green-50'
-              } ${activeFilter === 'completed' ? 'bg-green-100 ring-2 ring-green-300' : 'bg-green-50'}`}
+              className={`flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all hover:shadow-lg ${
+                onFilterChange ? 'hover:bg-green-200' : 'bg-green-100'
+              } ${activeFilter === 'completed' ? 'bg-green-200 ring-2 ring-green-400 shadow-md' : 'bg-green-100'}`}
               onClick={() => onFilterChange && onFilterChange('completed')}
             >
               <div className="flex items-center">
-                <CheckCircle size={16} className="text-green-500 mr-1" />
-                <span className="font-semibold text-green-700">{completedAssignments}</span>
+                <CheckCircle size={18} className="text-green-600 mr-1" />
+                <span className="font-bold text-green-800 text-lg">{completedAssignments}</span>
               </div>
-              <span className="text-xs text-green-600 mt-1">Tamamlanan</span>
+              <span className="text-sm text-green-700 mt-1 font-medium">Tamamlanan</span>
             </div>
             
             <div 
-              className={`flex flex-col items-center p-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                onFilterChange ? 'hover:bg-blue-100' : 'bg-blue-50'
-              } ${activeFilter === 'pending' ? 'bg-blue-100 ring-2 ring-blue-300' : 'bg-blue-50'}`}
+              className={`flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all hover:shadow-lg ${
+                onFilterChange ? 'hover:bg-blue-200' : 'bg-blue-100'
+              } ${activeFilter === 'pending' ? 'bg-blue-200 ring-2 ring-blue-400 shadow-md' : 'bg-blue-100'}`}
               onClick={() => onFilterChange && onFilterChange('pending')}
             >
               <div className="flex items-center">
-                <Clock size={16} className="text-blue-500 mr-1" />
-                <span className="font-semibold text-blue-700">{remainingAssignments}</span>
+                <Clock size={18} className="text-blue-600 mr-1" />
+                <span className="font-bold text-blue-800 text-lg">{remainingAssignments}</span>
               </div>
-              <span className="text-xs text-blue-600 mt-1">Bekleyen</span>
+              <span className="text-sm text-blue-700 mt-1 font-medium">Bekleyen</span>
             </div>
             
             {overdueAssignments > 0 && (
-              <div className="flex flex-col items-center p-2 bg-red-50 rounded-lg">
+              <div className="flex flex-col items-center p-3 bg-red-100 rounded-lg shadow-md">
                 <div className="flex items-center">
-                  <AlertCircle size={16} className="text-red-500 mr-1" />
-                  <span className="font-semibold text-red-700">{overdueAssignments}</span>
+                  <AlertCircle size={18} className="text-red-600 mr-1" />
+                  <span className="font-bold text-red-800 text-lg">{overdueAssignments}</span>
                 </div>
-                <span className="text-xs text-red-600 mt-1">Gecikmiş</span>
+                <span className="text-sm text-red-700 mt-1 font-medium">Gecikmiş</span>
               </div>
             )}
             
             {overdueAssignments === 0 && (
               <div 
-                className={`flex flex-col items-center p-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                  onFilterChange ? 'hover:bg-gray-100' : 'bg-gray-50'
-                } ${activeFilter === 'all' ? 'bg-gray-100 ring-2 ring-gray-300' : 'bg-gray-50'}`}
+                className={`flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all hover:shadow-lg ${
+                  onFilterChange ? 'hover:bg-gray-200' : 'bg-gray-100'
+                } ${activeFilter === 'all' ? 'bg-gray-200 ring-2 ring-gray-400 shadow-md' : 'bg-gray-100'}`}
                 onClick={() => onFilterChange && onFilterChange('all')}
               >
                 <div className="flex items-center">
-                  <span className="font-semibold text-gray-700">{totalAssignments}</span>
+                  <span className="font-bold text-gray-800 text-lg">{totalAssignments}</span>
                 </div>
-                <span className="text-xs text-gray-600 mt-1">Toplam</span>
+                <span className="text-sm text-gray-700 mt-1 font-medium">Toplam</span>
               </div>
             )}
           </div>

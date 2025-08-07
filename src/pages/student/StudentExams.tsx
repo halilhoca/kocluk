@@ -76,23 +76,23 @@ const StudentExams: React.FC = () => {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
       <div className="text-center">
         <div className="text-sm text-gray-600">Türkçe</div>
-        <div className="font-semibold">{exam.turkce_correct}D - {exam.turkce_wrong}Y</div>
-        <div className="text-blue-600 font-bold">{((exam.turkce_correct || 0) - (exam.turkce_wrong || 0) / 4).toFixed(1)} Net</div>
+        <div className="font-semibold">{exam.subject_scores.turkce.correct}D - {exam.subject_scores.turkce.wrong}Y</div>
+        <div className="text-blue-600 font-bold">{(exam.subject_scores.turkce.correct - exam.subject_scores.turkce.wrong / 4).toFixed(1)} Net</div>
       </div>
       <div className="text-center">
         <div className="text-sm text-gray-600">Matematik</div>
-        <div className="font-semibold">{exam.matematik_correct}D - {exam.matematik_wrong}Y</div>
-        <div className="text-blue-600 font-bold">{((exam.matematik_correct || 0) - (exam.matematik_wrong || 0) / 4).toFixed(1)} Net</div>
+        <div className="font-semibold">{exam.subject_scores.matematik.correct}D - {exam.subject_scores.matematik.wrong}Y</div>
+        <div className="text-blue-600 font-bold">{(exam.subject_scores.matematik.correct - exam.subject_scores.matematik.wrong / 4).toFixed(1)} Net</div>
       </div>
       <div className="text-center">
         <div className="text-sm text-gray-600">Fen Bilimleri</div>
-        <div className="font-semibold">{exam.fen_correct}D - {exam.fen_wrong}Y</div>
-        <div className="text-blue-600 font-bold">{((exam.fen_correct || 0) - (exam.fen_wrong || 0) / 4).toFixed(1)} Net</div>
+        <div className="font-semibold">{exam.subject_scores.fen.correct}D - {exam.subject_scores.fen.wrong}Y</div>
+        <div className="text-blue-600 font-bold">{(exam.subject_scores.fen.correct - exam.subject_scores.fen.wrong / 4).toFixed(1)} Net</div>
       </div>
       <div className="text-center">
         <div className="text-sm text-gray-600">Sosyal Bilimler</div>
-        <div className="font-semibold">{exam.sosyal_correct}D - {exam.sosyal_wrong}Y</div>
-        <div className="text-blue-600 font-bold">{((exam.sosyal_correct || 0) - (exam.sosyal_wrong || 0) / 4).toFixed(1)} Net</div>
+        <div className="font-semibold">{exam.subject_scores.sosyal.correct}D - {exam.subject_scores.sosyal.wrong}Y</div>
+        <div className="text-blue-600 font-bold">{(exam.subject_scores.sosyal.correct - exam.subject_scores.sosyal.wrong / 4).toFixed(1)} Net</div>
       </div>
     </div>
   );
@@ -102,15 +102,15 @@ const StudentExams: React.FC = () => {
       <div className="grid grid-cols-3 gap-4 text-center">
         <div>
           <div className="text-sm text-gray-600">Ders</div>
-          <div className="font-semibold">{exam.subject_name}</div>
+          <div className="font-semibold">{exam.subject_scores.subject}</div>
         </div>
         <div>
           <div className="text-sm text-gray-600">Doğru - Yanlış - Boş</div>
-          <div className="font-semibold">{exam.correct_answers}D - {exam.wrong_answers}Y - {exam.blank_answers}B</div>
+          <div className="font-semibold">{exam.correct_answers}D - {exam.wrong_answers}Y - {exam.empty_answers}B</div>
         </div>
         <div>
           <div className="text-sm text-gray-600">Net</div>
-          <div className="text-blue-600 font-bold text-lg">{exam.total_net.toFixed(2)}</div>
+          <div className="text-blue-600 font-bold text-lg">{exam.net_score.toFixed(2)}</div>
         </div>
       </div>
     </div>
@@ -133,7 +133,7 @@ const StudentExams: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
-            onClick={() => navigate('/student')}
+            onClick={() => navigate('/student/welcome')}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -259,7 +259,7 @@ const StudentExams: React.FC = () => {
                         {formatDate(exam.exam_date)}
                       </div>
                       <div className="font-semibold text-blue-600">
-                        Toplam Net: {exam.total_net.toFixed(2)}
+                        Toplam Net: {exam.net_score.toFixed(2)}
                       </div>
                     </div>
                   </div>
