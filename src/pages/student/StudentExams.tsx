@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
-import { getStudentExams, getExamStatistics, deleteStudentExam, StudentExam } from '../../lib/examService';
+import { getStudentExams, getExamStatistics, deleteStudentExam, StudentExam, getStudentIdFromAuthUser } from '../../lib/examService';
 import { ArrowLeft, Calendar, TrendingUp, Target, Award, Trash2, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -25,16 +25,19 @@ const StudentExams: React.FC = () => {
     
     setLoading(true);
     try {
+      const { studentId } = await getStudentIdFromAuthUser(user.id);
       const examType = selectedType === 'ALL' ? undefined : selectedType;
-      const { data, stats, error } = await getExamStatistics(user.id, examType as any);
+      const { data, stats, error } = await getExamStatistics(studentId, examType as any);
       
       if (error) {
+        console.error('Deneme istatistikleri getirme hatası:', error);
         toast.error('Denemeler yüklenirken hata oluştu');
       } else {
         setExams(data || []);
         setStatistics(stats);
       }
     } catch (error) {
+      console.error('Deneme istatistikleri getirme hatası:', error);
       toast.error('Beklenmeyen bir hata oluştu');
     } finally {
       setLoading(false);

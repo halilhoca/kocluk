@@ -23,10 +23,39 @@ const StudentWelcome: React.FC = () => {
   
   const [tytData, setTytData] = useState({
     turkce: { correct: '', wrong: '', blank: '' },
+    sosyal: {
+      tarih: { correct: '', wrong: '', blank: '' },
+      cografya: { correct: '', wrong: '', blank: '' },
+      felsefe: { correct: '', wrong: '', blank: '' },
+      dinKultur: { correct: '', wrong: '', blank: '' }
+    },
     matematik: { correct: '', wrong: '', blank: '' },
-    fen: { correct: '', wrong: '', blank: '' },
-    sosyal: { correct: '', wrong: '', blank: '' }
+    fen: {
+      fizik: { correct: '', wrong: '', blank: '' },
+      kimya: { correct: '', wrong: '', blank: '' },
+      biyoloji: { correct: '', wrong: '', blank: '' }
+    }
   });
+
+  // Net hesaplama fonksiyonu
+  const calculateNet = (correct: string, wrong: string) => {
+    const correctNum = parseInt(correct) || 0;
+    const wrongNum = parseInt(wrong) || 0;
+    return correctNum - (wrongNum / 4);
+  };
+
+  // Toplam net hesaplama fonksiyonları
+  const calculateSubjectTotalNet = (subjectData: any) => {
+    if (typeof subjectData.correct === 'string') {
+      // Basit ders (Türkçe, Matematik)
+      return calculateNet(subjectData.correct, subjectData.wrong);
+    } else {
+      // Alt kategorili ders (Fen, Sosyal)
+      return Object.values(subjectData).reduce((total: number, subData: any) => {
+        return total + calculateNet(subData.correct, subData.wrong);
+      }, 0);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -54,9 +83,18 @@ const StudentWelcome: React.FC = () => {
     });
     setTytData({
       turkce: { correct: '', wrong: '', blank: '' },
+      sosyal: {
+        tarih: { correct: '', wrong: '', blank: '' },
+        cografya: { correct: '', wrong: '', blank: '' },
+        felsefe: { correct: '', wrong: '', blank: '' },
+        dinKultur: { correct: '', wrong: '', blank: '' }
+      },
       matematik: { correct: '', wrong: '', blank: '' },
-      fen: { correct: '', wrong: '', blank: '' },
-      sosyal: { correct: '', wrong: '', blank: '' }
+      fen: {
+        fizik: { correct: '', wrong: '', blank: '' },
+        kimya: { correct: '', wrong: '', blank: '' },
+        biyoloji: { correct: '', wrong: '', blank: '' }
+      }
     });
   };
 
@@ -82,11 +120,39 @@ const StudentWelcome: React.FC = () => {
     }
 
     try {
-      const studentId = await getStudentIdFromAuthUser(user.id);
+      const { studentId } = await getStudentIdFromAuthUser(user.id);
       
       if (selectedExamType === 'TYT') {
-        await saveTYTExam({
-          studentId,
+        // Fen bilimlerini birleştir
+        const fenTotal = {
+          correct: (parseInt(tytData.fen.fizik.correct) || 0) + 
+                   (parseInt(tytData.fen.kimya.correct) || 0) + 
+                   (parseInt(tytData.fen.biyoloji.correct) || 0),
+          wrong: (parseInt(tytData.fen.fizik.wrong) || 0) + 
+                 (parseInt(tytData.fen.kimya.wrong) || 0) + 
+                 (parseInt(tytData.fen.biyoloji.wrong) || 0),
+          blank: (parseInt(tytData.fen.fizik.blank) || 0) + 
+                 (parseInt(tytData.fen.kimya.blank) || 0) + 
+                 (parseInt(tytData.fen.biyoloji.blank) || 0)
+        };
+        
+        // Sosyal bilimleri birleştir
+        const sosyalTotal = {
+          correct: (parseInt(tytData.sosyal.tarih.correct) || 0) + 
+                   (parseInt(tytData.sosyal.cografya.correct) || 0) + 
+                   (parseInt(tytData.sosyal.felsefe.correct) || 0) + 
+                   (parseInt(tytData.sosyal.dinKultur.correct) || 0),
+          wrong: (parseInt(tytData.sosyal.tarih.wrong) || 0) + 
+                 (parseInt(tytData.sosyal.cografya.wrong) || 0) + 
+                 (parseInt(tytData.sosyal.felsefe.wrong) || 0) + 
+                 (parseInt(tytData.sosyal.dinKultur.wrong) || 0),
+          blank: (parseInt(tytData.sosyal.tarih.blank) || 0) + 
+                 (parseInt(tytData.sosyal.cografya.blank) || 0) + 
+                 (parseInt(tytData.sosyal.felsefe.blank) || 0) + 
+                 (parseInt(tytData.sosyal.dinKultur.blank) || 0)
+        };
+        
+        await saveTYTExam(studentId, {
           examName,
           turkce: tytData.turkce,
           matematik: tytData.matematik,
@@ -94,13 +160,12 @@ const StudentWelcome: React.FC = () => {
           sosyal: tytData.sosyal
         });
       } else {
-        await saveSingleSubjectExam({
-          studentId,
+        await saveSingleSubjectExam(studentId, selectedExamType as 'AYT' | 'LGS', {
           examName,
           subject: examData.subject,
-          correct: parseInt(examData.correct) || 0,
-          wrong: parseInt(examData.wrong) || 0,
-          blank: parseInt(examData.blank) || 0
+          correct: examData.correct,
+          wrong: examData.wrong,
+          blank: examData.blank
         });
       }
 
@@ -317,58 +382,224 @@ const StudentWelcome: React.FC = () => {
                   <div className="space-y-6">
                     {Object.entries(tytData).map(([subject, data]) => (
                       <div key={subject} className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="font-semibold text-gray-900 mb-3 capitalize">
-                          {subject === 'turkce' ? 'Türkçe' : 
-                           subject === 'matematik' ? 'Matematik' :
-                           subject === 'fen' ? 'Fen Bilimleri' : 'Sosyal Bilimler'}
-                        </h3>
-                        <div className="grid grid-cols-3 gap-3">
+                        {subject === 'fen' ? (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Doğru
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={data.correct}
-                              onChange={(e) => setTytData(prev => ({
-                                ...prev,
-                                [subject]: { ...prev[subject as keyof typeof prev], correct: e.target.value }
-                              }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <h3 className="font-semibold text-gray-900 mb-3 capitalize flex justify-between items-center">
+                              <span>Fen Bilimleri</span>
+                              <span className="text-sm font-normal text-blue-600">
+                                Toplam Net: {calculateSubjectTotalNet(data).toFixed(2)}
+                              </span>
+                            </h3>
+                            <div className="space-y-4">
+                              {Object.entries(data as any).map(([subSubject, subData]: [string, any]) => (
+                                <div key={subSubject} className="ml-4">
+                                  <h4 className="text-sm font-medium text-gray-700 mb-2 capitalize flex justify-between items-center">
+                                    <span>
+                                      {subSubject === 'fizik' ? 'Fizik' : 
+                                       subSubject === 'kimya' ? 'Kimya' : 'Biyoloji'}
+                                    </span>
+                                    <span className="text-xs font-normal text-green-600">
+                                      Net: {calculateNet(subData.correct, subData.wrong).toFixed(2)}
+                                    </span>
+                                  </h4>
+                                  <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Doğru
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={subData.correct}
+                                        onChange={(e) => setTytData(prev => ({
+                                          ...prev,
+                                          fen: {
+                                            ...prev.fen,
+                                            [subSubject]: { ...prev.fen[subSubject as keyof typeof prev.fen], correct: e.target.value }
+                                          }
+                                        }))}
+                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Yanlış
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={subData.wrong}
+                                        onChange={(e) => setTytData(prev => ({
+                                          ...prev,
+                                          fen: {
+                                            ...prev.fen,
+                                            [subSubject]: { ...prev.fen[subSubject as keyof typeof prev.fen], wrong: e.target.value }
+                                          }
+                                        }))}
+                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Boş
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={subData.blank}
+                                        onChange={(e) => setTytData(prev => ({
+                                          ...prev,
+                                          fen: {
+                                            ...prev.fen,
+                                            [subSubject]: { ...prev.fen[subSubject as keyof typeof prev.fen], blank: e.target.value }
+                                          }
+                                        }))}
+                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
+                        ) : subject === 'sosyal' ? (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Yanlış
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={data.wrong}
-                              onChange={(e) => setTytData(prev => ({
-                                ...prev,
-                                [subject]: { ...prev[subject as keyof typeof prev], wrong: e.target.value }
-                              }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <h3 className="font-semibold text-gray-900 mb-3 capitalize flex justify-between items-center">
+                              <span>Sosyal Bilimler</span>
+                              <span className="text-sm font-normal text-blue-600">
+                                Toplam Net: {calculateSubjectTotalNet(data).toFixed(2)}
+                              </span>
+                            </h3>
+                            <div className="space-y-4">
+                              {Object.entries(data as any).map(([subSubject, subData]: [string, any]) => (
+                                <div key={subSubject} className="ml-4">
+                                  <h4 className="text-sm font-medium text-gray-700 mb-2 capitalize flex justify-between items-center">
+                                    <span>
+                                      {subSubject === 'tarih' ? 'Tarih' : 
+                                       subSubject === 'cografya' ? 'Coğrafya' : 
+                                       subSubject === 'felsefe' ? 'Felsefe' : 'Din Kültürü'}
+                                    </span>
+                                    <span className="text-xs font-normal text-green-600">
+                                      Net: {calculateNet(subData.correct, subData.wrong).toFixed(2)}
+                                    </span>
+                                  </h4>
+                                  <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Doğru
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={subData.correct}
+                                        onChange={(e) => setTytData(prev => ({
+                                          ...prev,
+                                          sosyal: {
+                                            ...prev.sosyal,
+                                            [subSubject]: { ...prev.sosyal[subSubject as keyof typeof prev.sosyal], correct: e.target.value }
+                                          }
+                                        }))}
+                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Yanlış
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={subData.wrong}
+                                        onChange={(e) => setTytData(prev => ({
+                                          ...prev,
+                                          sosyal: {
+                                            ...prev.sosyal,
+                                            [subSubject]: { ...prev.sosyal[subSubject as keyof typeof prev.sosyal], wrong: e.target.value }
+                                          }
+                                        }))}
+                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                                        Boş
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={subData.blank}
+                                        onChange={(e) => setTytData(prev => ({
+                                          ...prev,
+                                          sosyal: {
+                                            ...prev.sosyal,
+                                            [subSubject]: { ...prev.sosyal[subSubject as keyof typeof prev.sosyal], blank: e.target.value }
+                                          }
+                                        }))}
+                                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
+                        ) : (
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Boş
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={data.blank}
-                              onChange={(e) => setTytData(prev => ({
-                                ...prev,
-                                [subject]: { ...prev[subject as keyof typeof prev], blank: e.target.value }
-                              }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <h3 className="font-semibold text-gray-900 mb-3 capitalize flex justify-between items-center">
+                              <span>{subject === 'turkce' ? 'Türkçe' : 'Matematik'}</span>
+                              <span className="text-sm font-normal text-blue-600">
+                                Toplam Net: {calculateSubjectTotalNet(data).toFixed(2)}
+                              </span>
+                            </h3>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Doğru
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={data.correct}
+                                  onChange={(e) => setTytData(prev => ({
+                                    ...prev,
+                                    [subject]: { ...prev[subject as keyof typeof prev], correct: e.target.value }
+                                  }))}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Yanlış
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={data.wrong}
+                                  onChange={(e) => setTytData(prev => ({
+                                    ...prev,
+                                    [subject]: { ...prev[subject as keyof typeof prev], wrong: e.target.value }
+                                  }))}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  Boş
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={data.blank}
+                                  onChange={(e) => setTytData(prev => ({
+                                    ...prev,
+                                    [subject]: { ...prev[subject as keyof typeof prev], blank: e.target.value }
+                                  }))}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -457,6 +688,49 @@ const StudentWelcome: React.FC = () => {
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedExamType === 'TYT' && (
+                  <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Toplam Net Sayıları</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="text-sm font-medium text-gray-600">Türkçe</div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {calculateSubjectTotalNet(tytData.turkce).toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="text-sm font-medium text-gray-600">Matematik</div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {calculateSubjectTotalNet(tytData.matematik).toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="text-sm font-medium text-gray-600">Fen Bilimleri</div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {calculateSubjectTotalNet(tytData.fen).toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                        <div className="text-sm font-medium text-gray-600">Sosyal Bilimler</div>
+                        <div className="text-xl font-bold text-blue-600">
+                          {calculateSubjectTotalNet(tytData.sosyal).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 text-center p-4 bg-white rounded-lg shadow-sm border-2 border-green-200">
+                      <div className="text-lg font-medium text-gray-700">Toplam Net</div>
+                      <div className="text-3xl font-bold text-green-600">
+                        {(
+                          calculateSubjectTotalNet(tytData.turkce) +
+                          calculateSubjectTotalNet(tytData.matematik) +
+                          calculateSubjectTotalNet(tytData.fen) +
+                          calculateSubjectTotalNet(tytData.sosyal)
+                        ).toFixed(2)}
                       </div>
                     </div>
                   </div>

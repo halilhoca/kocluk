@@ -9,10 +9,19 @@ export async function getStudentIdFromAuthUser(authUserId: string): Promise<{ st
 
 export interface TYTExamData {
   examName: string;
-  turkce: { correct: string; wrong: string };
-  matematik: { correct: string; wrong: string };
-  fen: { correct: string; wrong: string };
-  sosyal: { correct: string; wrong: string };
+  turkce: { correct: string; wrong: string; blank: string };
+  matematik: { correct: string; wrong: string; blank: string };
+  fen: {
+    fizik: { correct: string; wrong: string; blank: string };
+    kimya: { correct: string; wrong: string; blank: string };
+    biyoloji: { correct: string; wrong: string; blank: string };
+  };
+  sosyal: {
+    tarih: { correct: string; wrong: string; blank: string };
+    cografya: { correct: string; wrong: string; blank: string };
+    felsefe: { correct: string; wrong: string; blank: string };
+    dinKultur: { correct: string; wrong: string; blank: string };
+  };
 }
 
 export interface SingleSubjectExamData {
@@ -46,10 +55,24 @@ export const saveTYTExam = async (studentId: string, examData: TYTExamData) => {
     const turkceWrong = parseInt(examData.turkce.wrong) || 0;
     const matematikCorrect = parseInt(examData.matematik.correct) || 0;
     const matematikWrong = parseInt(examData.matematik.wrong) || 0;
-    const fenCorrect = parseInt(examData.fen.correct) || 0;
-    const fenWrong = parseInt(examData.fen.wrong) || 0;
-    const sosyalCorrect = parseInt(examData.sosyal.correct) || 0;
-    const sosyalWrong = parseInt(examData.sosyal.wrong) || 0;
+    
+    // Fen bilimleri alt kategorilerini topla
+    const fenCorrect = (parseInt(examData.fen.fizik.correct) || 0) + 
+                      (parseInt(examData.fen.kimya.correct) || 0) + 
+                      (parseInt(examData.fen.biyoloji.correct) || 0);
+    const fenWrong = (parseInt(examData.fen.fizik.wrong) || 0) + 
+                    (parseInt(examData.fen.kimya.wrong) || 0) + 
+                    (parseInt(examData.fen.biyoloji.wrong) || 0);
+    
+    // Sosyal bilimler alt kategorilerini topla
+    const sosyalCorrect = (parseInt(examData.sosyal.tarih.correct) || 0) + 
+                         (parseInt(examData.sosyal.cografya.correct) || 0) + 
+                         (parseInt(examData.sosyal.felsefe.correct) || 0) + 
+                         (parseInt(examData.sosyal.dinKultur.correct) || 0);
+    const sosyalWrong = (parseInt(examData.sosyal.tarih.wrong) || 0) + 
+                       (parseInt(examData.sosyal.cografya.wrong) || 0) + 
+                       (parseInt(examData.sosyal.felsefe.wrong) || 0) + 
+                       (parseInt(examData.sosyal.dinKultur.wrong) || 0);
 
     const totalCorrect = turkceCorrect + matematikCorrect + fenCorrect + sosyalCorrect;
     const totalWrong = turkceWrong + matematikWrong + fenWrong + sosyalWrong;
@@ -62,8 +85,42 @@ export const saveTYTExam = async (studentId: string, examData: TYTExamData) => {
       examName: examData.examName,
       turkce: { correct: turkceCorrect, wrong: turkceWrong },
       matematik: { correct: matematikCorrect, wrong: matematikWrong },
-      fen: { correct: fenCorrect, wrong: fenWrong },
-      sosyal: { correct: sosyalCorrect, wrong: sosyalWrong }
+      fen: {
+        correct: fenCorrect,
+        wrong: fenWrong,
+        fizik: { 
+          correct: parseInt(examData.fen.fizik.correct) || 0, 
+          wrong: parseInt(examData.fen.fizik.wrong) || 0 
+        },
+        kimya: { 
+          correct: parseInt(examData.fen.kimya.correct) || 0, 
+          wrong: parseInt(examData.fen.kimya.wrong) || 0 
+        },
+        biyoloji: { 
+          correct: parseInt(examData.fen.biyoloji.correct) || 0, 
+          wrong: parseInt(examData.fen.biyoloji.wrong) || 0 
+        }
+      },
+      sosyal: {
+        correct: sosyalCorrect,
+        wrong: sosyalWrong,
+        tarih: { 
+          correct: parseInt(examData.sosyal.tarih.correct) || 0, 
+          wrong: parseInt(examData.sosyal.tarih.wrong) || 0 
+        },
+        cografya: { 
+          correct: parseInt(examData.sosyal.cografya.correct) || 0, 
+          wrong: parseInt(examData.sosyal.cografya.wrong) || 0 
+        },
+        felsefe: { 
+          correct: parseInt(examData.sosyal.felsefe.correct) || 0, 
+          wrong: parseInt(examData.sosyal.felsefe.wrong) || 0 
+        },
+        dinKultur: { 
+          correct: parseInt(examData.sosyal.dinKultur.correct) || 0, 
+          wrong: parseInt(examData.sosyal.dinKultur.wrong) || 0 
+        }
+      }
     };
 
     const { data, error } = await supabaseAdmin
