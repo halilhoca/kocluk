@@ -27,6 +27,76 @@ const StudentExams: React.FC = () => {
     });
   };
 
+  // Deneme başlığına göre özel istatistik hesaplama
+  const calculateCustomStatistics = (exams: StudentExam[], examType: string) => {
+    if (!exams || exams.length === 0) {
+      return {
+        totalExams: 0,
+        averageNet: '0',
+        bestNet: '0',
+        latestNet: '0',
+        improvement: '0'
+      };
+    }
+
+    // Benzersiz deneme başlıklarını bul
+    const uniqueExamNames = new Set<string>();
+    const examsByName: { [key: string]: StudentExam[] } = {};
+
+    exams.forEach(exam => {
+      let examName: string;
+      
+      if (exam.exam_type === 'AYT') {
+        // AYT için examName'den ders kısmını çıkar
+        examName = exam.subject_scores?.examName?.split(' - ')[0] || exam.exam_date;
+      } else {
+        // TYT ve LGS için examName'i direkt kullan
+        examName = exam.subject_scores?.examName || exam.exam_date;
+      }
+      
+      uniqueExamNames.add(examName);
+      
+      if (!examsByName[examName]) {
+        examsByName[examName] = [];
+      }
+      examsByName[examName].push(exam);
+    });
+
+    // Her deneme için toplam net hesapla
+    const examTotals: number[] = [];
+    const examDates: { date: string; totalNet: number }[] = [];
+
+    Object.entries(examsByName).forEach(([examName, examList]) => {
+      const totalNet = examList.reduce((sum, exam) => sum + exam.net_score, 0);
+      examTotals.push(totalNet);
+      
+      // En son tarihli sınavı al
+      const latestExam = examList.sort((a, b) => new Date(b.exam_date).getTime() - new Date(a.exam_date).getTime())[0];
+      examDates.push({ date: latestExam.exam_date, totalNet });
+    });
+
+    // Tarihe göre sırala
+    examDates.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const totalExams = uniqueExamNames.size;
+    const averageNet = examTotals.length ? (examTotals.reduce((sum, net) => sum + net, 0) / examTotals.length).toFixed(2) : '0';
+    const bestNet = examTotals.length ? Math.max(...examTotals).toFixed(2) : '0';
+    const latestNet = examDates.length ? examDates[0].totalNet.toFixed(2) : '0';
+    const improvement = examDates.length >= 2 ? (examDates[0].totalNet - examDates[examDates.length - 1].totalNet).toFixed(2) : '0';
+    
+    // Bir önceki denemeye göre değişim hesapla
+    const previousChange = examDates.length >= 2 ? (examDates[0].totalNet - examDates[1].totalNet).toFixed(2) : '0';
+
+    return {
+      totalExams,
+      averageNet,
+      bestNet,
+      latestNet,
+      improvement,
+      previousChange
+    };
+  };
+
   useEffect(() => {
     if (user?.id) {
       fetchExams();
@@ -47,7 +117,10 @@ const StudentExams: React.FC = () => {
         toast.error('Denemeler yüklenirken hata oluştu');
       } else {
         setExams(data || []);
-        setStatistics(stats);
+        
+        // Deneme sayısını deneme başlığına göre hesapla
+        const customStats = calculateCustomStatistics(data || [], selectedType);
+        setStatistics(customStats);
       }
     } catch (error) {
       console.error('Deneme istatistikleri getirme hatası:', error);
@@ -79,37 +152,75 @@ const StudentExams: React.FC = () => {
 
   const getExamTypeColor = (type: string) => {
     switch (type) {
-      case 'TYT': return 'bg-blue-100 text-blue-800';
+      case 'TYT': return 'bg-green-100 text-green-800';
       case 'AYT': return 'bg-green-100 text-green-800';
       case 'LGS': return 'bg-orange-100 text-orange-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const renderTYTDetails = (exam: StudentExam) => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-      <div className="text-center">
-        <div className="text-sm text-gray-600">Türkçe</div>
-        <div className="font-semibold">{exam.subject_scores.turkce.correct}D - {exam.subject_scores.turkce.wrong}Y</div>
-        <div className="text-blue-600 font-bold">{(exam.subject_scores.turkce.correct - exam.subject_scores.turkce.wrong / 4).toFixed(1)} Net</div>
+  const renderTYTDetails = (exam: StudentExam) => {
+    const subjects = [
+      { name: 'Türkçe', data: exam.subject_scores.turkce },
+      { name: 'Matematik', data: exam.subject_scores.matematik },
+      { name: 'Fen Bilimleri', data: exam.subject_scores.fen },
+      { name: 'Sosyal Bilimler', data: exam.subject_scores.sosyal }
+    ];
+    
+    const totalCorrect = subjects.reduce((sum, subject) => sum + (subject.data?.correct || 0), 0);
+    const totalWrong = subjects.reduce((sum, subject) => sum + (subject.data?.wrong || 0), 0);
+    const totalBlank = subjects.reduce((sum, subject) => sum + (subject.data?.blank || 0), 0);
+    const totalNet = subjects.reduce((sum, subject) => {
+      const correct = subject.data?.correct || 0;
+      const wrong = subject.data?.wrong || 0;
+      return sum + (correct - wrong / 4);
+    }, 0);
+    
+    return (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left p-2 font-semibold text-gray-700">Ders</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Doğru</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Yanlış</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Boş</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Net</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subjects.map(subject => {
+                const correct = subject.data?.correct || 0;
+                const wrong = subject.data?.wrong || 0;
+                const blank = subject.data?.blank || 0;
+                const net = correct - wrong / 4;
+                
+                return (
+                  <tr key={subject.name} className="border-b border-gray-200 hover:bg-gray-100">
+                    <td className="p-2 font-medium">{subject.name}</td>
+                    <td className="p-2 text-center">{correct}</td>
+                    <td className="p-2 text-center">{wrong}</td>
+                    <td className="p-2 text-center">{blank}</td>
+                    <td className="p-2 text-center font-bold text-blue-600">
+                      {net.toFixed(2)}
+                    </td>
+                  </tr>
+                );
+              })}
+              <tr className="border-t-2 border-gray-400 bg-blue-50">
+                <td className="p-2 font-bold">TOPLAM</td>
+                <td className="p-2 text-center font-bold">{totalCorrect}</td>
+                <td className="p-2 text-center font-bold">{totalWrong}</td>
+                <td className="p-2 text-center font-bold">{totalBlank}</td>
+                <td className="p-2 text-center font-bold text-green-600">{totalNet.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div className="text-center">
-        <div className="text-sm text-gray-600">Matematik</div>
-        <div className="font-semibold">{exam.subject_scores.matematik.correct}D - {exam.subject_scores.matematik.wrong}Y</div>
-        <div className="text-blue-600 font-bold">{(exam.subject_scores.matematik.correct - exam.subject_scores.matematik.wrong / 4).toFixed(1)} Net</div>
-      </div>
-      <div className="text-center">
-        <div className="text-sm text-gray-600">Fen Bilimleri</div>
-        <div className="font-semibold">{exam.subject_scores.fen.correct}D - {exam.subject_scores.fen.wrong}Y</div>
-        <div className="text-blue-600 font-bold">{(exam.subject_scores.fen.correct - exam.subject_scores.fen.wrong / 4).toFixed(1)} Net</div>
-      </div>
-      <div className="text-center">
-        <div className="text-sm text-gray-600">Sosyal Bilimler</div>
-        <div className="font-semibold">{exam.subject_scores.sosyal.correct}D - {exam.subject_scores.sosyal.wrong}Y</div>
-        <div className="text-blue-600 font-bold">{(exam.subject_scores.sosyal.correct - exam.subject_scores.sosyal.wrong / 4).toFixed(1)} Net</div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderAYTDetails = (aytExams: StudentExam[]) => {
     const subjects = ['Matematik', 'Edebiyat-Sosyal Bilimler 1', 'Sosyal Bilimler-2', 'Fen Bilimleri'];
@@ -293,6 +404,13 @@ const StudentExams: React.FC = () => {
                       : statistics.latestNet
                     }
                   </p>
+                  {selectedType !== 'ALL' && statistics.previousChange && (
+                    <p className={`text-sm font-medium ${
+                      parseFloat(statistics.previousChange) >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {parseFloat(statistics.previousChange) >= 0 ? '+' : ''}{statistics.previousChange} (önceki denemeye göre)
+                    </p>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -416,12 +534,20 @@ const StudentExams: React.FC = () => {
                       className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
                     >
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
+                        <div 
+                          className="flex-1 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                          onClick={() => toggleExpanded(exam.subject_scores.examName)}
+                        >
                           <div className="flex items-center gap-3 mb-2">
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${getExamTypeColor(exam.exam_type)}`}>
                               {exam.exam_type}
                             </span>
                             <h3 className="text-xl font-bold text-gray-800">{exam.subject_scores.examName}</h3>
+                            <ChevronDown 
+                              className={`w-5 h-5 text-gray-500 transition-transform ${
+                                expandedExams.has(exam.subject_scores.examName) ? 'rotate-180' : ''
+                              }`}
+                            />
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
@@ -440,7 +566,7 @@ const StudentExams: React.FC = () => {
                           <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
-                      {exam.exam_type === 'TYT' ? renderTYTDetails(exam) : renderSingleSubjectDetails(exam)}
+                      {expandedExams.has(exam.subject_scores.examName) && (exam.exam_type === 'TYT' ? renderTYTDetails(exam) : renderSingleSubjectDetails(exam))}
                     </motion.div>
                   );
                 }
