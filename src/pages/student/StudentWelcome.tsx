@@ -14,12 +14,7 @@ const StudentWelcome: React.FC = () => {
   const [showAddExamModal, setShowAddExamModal] = useState(false);
   const [selectedExamType, setSelectedExamType] = useState('');
   const [examName, setExamName] = useState('');
-  const [examData, setExamData] = useState({
-    subject: '',
-    correct: '',
-    wrong: '',
-    blank: ''
-  });
+
   
   const [tytData, setTytData] = useState({
     turkce: { correct: '', wrong: '', blank: '' },
@@ -31,6 +26,26 @@ const StudentWelcome: React.FC = () => {
     },
     matematik: { correct: '', wrong: '', blank: '' },
     fen: {
+      fizik: { correct: '', wrong: '', blank: '' },
+      kimya: { correct: '', wrong: '', blank: '' },
+      biyoloji: { correct: '', wrong: '', blank: '' }
+    }
+  });
+
+  const [aytData, setAytData] = useState({
+    matematik: { correct: '', wrong: '', blank: '' },
+    edebiyatSosyal: {
+      edebiyat: { correct: '', wrong: '', blank: '' },
+      tarih: { correct: '', wrong: '', blank: '' },
+      cografya: { correct: '', wrong: '', blank: '' }
+    },
+    sosyalBilimler2: {
+      tarih: { correct: '', wrong: '', blank: '' },
+      cografya: { correct: '', wrong: '', blank: '' },
+      felsefe: { correct: '', wrong: '', blank: '' },
+      din: { correct: '', wrong: '', blank: '' }
+    },
+    fenBilimleri: {
       fizik: { correct: '', wrong: '', blank: '' },
       kimya: { correct: '', wrong: '', blank: '' },
       biyoloji: { correct: '', wrong: '', blank: '' }
@@ -75,12 +90,6 @@ const StudentWelcome: React.FC = () => {
   };
 
   const resetExamData = () => {
-    setExamData({
-      subject: '',
-      correct: '',
-      wrong: '',
-      blank: ''
-    });
     setTytData({
       turkce: { correct: '', wrong: '', blank: '' },
       sosyal: {
@@ -91,6 +100,25 @@ const StudentWelcome: React.FC = () => {
       },
       matematik: { correct: '', wrong: '', blank: '' },
       fen: {
+        fizik: { correct: '', wrong: '', blank: '' },
+        kimya: { correct: '', wrong: '', blank: '' },
+        biyoloji: { correct: '', wrong: '', blank: '' }
+      }
+    });
+    setAytData({
+      matematik: { correct: '', wrong: '', blank: '' },
+      edebiyatSosyal: {
+        edebiyat: { correct: '', wrong: '', blank: '' },
+        tarih: { correct: '', wrong: '', blank: '' },
+        cografya: { correct: '', wrong: '', blank: '' }
+      },
+      sosyalBilimler2: {
+        tarih: { correct: '', wrong: '', blank: '' },
+        cografya: { correct: '', wrong: '', blank: '' },
+        felsefe: { correct: '', wrong: '', blank: '' },
+        din: { correct: '', wrong: '', blank: '' }
+      },
+      fenBilimleri: {
         fizik: { correct: '', wrong: '', blank: '' },
         kimya: { correct: '', wrong: '', blank: '' },
         biyoloji: { correct: '', wrong: '', blank: '' }
@@ -159,13 +187,62 @@ const StudentWelcome: React.FC = () => {
           fen: tytData.fen,
           sosyal: tytData.sosyal
         });
-      } else {
-        await saveSingleSubjectExam(studentId, selectedExamType as 'AYT' | 'LGS', {
-          examName,
-          subject: examData.subject,
-          correct: examData.correct,
-          wrong: examData.wrong,
-          blank: examData.blank
+      } else if (selectedExamType === 'AYT') {
+        // Matematik kaydet
+        await saveSingleSubjectExam(studentId, 'AYT', {
+          examName: examName + ' - Matematik',
+          subject: 'Matematik',
+          correct: parseInt(aytData.matematik.correct) || 0,
+          wrong: parseInt(aytData.matematik.wrong) || 0,
+          blank: parseInt(aytData.matematik.blank) || 0
+        });
+        
+        // Edebiyat-Sosyal Bilimler 1 kaydet
+        await saveSingleSubjectExam(studentId, 'AYT', {
+          examName: examName + ' - Edebiyat-Sosyal Bilimler 1',
+          subject: 'Edebiyat-Sosyal Bilimler 1',
+          correct: (parseInt(aytData.edebiyatSosyal.edebiyat.correct) || 0) + 
+                   (parseInt(aytData.edebiyatSosyal.tarih.correct) || 0) + 
+                   (parseInt(aytData.edebiyatSosyal.cografya.correct) || 0),
+          wrong: (parseInt(aytData.edebiyatSosyal.edebiyat.wrong) || 0) + 
+                 (parseInt(aytData.edebiyatSosyal.tarih.wrong) || 0) + 
+                 (parseInt(aytData.edebiyatSosyal.cografya.wrong) || 0),
+          blank: (parseInt(aytData.edebiyatSosyal.edebiyat.blank) || 0) + 
+                 (parseInt(aytData.edebiyatSosyal.tarih.blank) || 0) + 
+                 (parseInt(aytData.edebiyatSosyal.cografya.blank) || 0)
+        });
+        
+        // Sosyal Bilimler-2 kaydet
+        await saveSingleSubjectExam(studentId, 'AYT', {
+          examName: examName + ' - Sosyal Bilimler-2',
+          subject: 'Sosyal Bilimler-2',
+          correct: (parseInt(aytData.sosyalBilimler2.tarih.correct) || 0) + 
+                   (parseInt(aytData.sosyalBilimler2.cografya.correct) || 0) + 
+                   (parseInt(aytData.sosyalBilimler2.felsefe.correct) || 0) + 
+                   (parseInt(aytData.sosyalBilimler2.din.correct) || 0),
+          wrong: (parseInt(aytData.sosyalBilimler2.tarih.wrong) || 0) + 
+                 (parseInt(aytData.sosyalBilimler2.cografya.wrong) || 0) + 
+                 (parseInt(aytData.sosyalBilimler2.felsefe.wrong) || 0) + 
+                 (parseInt(aytData.sosyalBilimler2.din.wrong) || 0),
+          blank: (parseInt(aytData.sosyalBilimler2.tarih.blank) || 0) + 
+                 (parseInt(aytData.sosyalBilimler2.cografya.blank) || 0) + 
+                 (parseInt(aytData.sosyalBilimler2.felsefe.blank) || 0) + 
+                 (parseInt(aytData.sosyalBilimler2.din.blank) || 0)
+        });
+        
+        // Fen Bilimleri kaydet
+        await saveSingleSubjectExam(studentId, 'AYT', {
+          examName: examName + ' - Fen Bilimleri',
+          subject: 'Fen Bilimleri',
+          correct: (parseInt(aytData.fenBilimleri.fizik.correct) || 0) + 
+                   (parseInt(aytData.fenBilimleri.kimya.correct) || 0) + 
+                   (parseInt(aytData.fenBilimleri.biyoloji.correct) || 0),
+          wrong: (parseInt(aytData.fenBilimleri.fizik.wrong) || 0) + 
+                 (parseInt(aytData.fenBilimleri.kimya.wrong) || 0) + 
+                 (parseInt(aytData.fenBilimleri.biyoloji.wrong) || 0),
+          blank: (parseInt(aytData.fenBilimleri.fizik.blank) || 0) + 
+                 (parseInt(aytData.fenBilimleri.kimya.blank) || 0) + 
+                 (parseInt(aytData.fenBilimleri.biyoloji.blank) || 0)
         });
       }
 
@@ -317,15 +394,7 @@ const StudentWelcome: React.FC = () => {
                 AYT Denemesi
               </button>
               
-              <button
-                onClick={() => {
-                  handleExamTypeSelect('Tekil');
-                  setShowAddExamModal(true);
-                }}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-105"
-              >
-                Tekil Ders Denemesi
-              </button>
+
             </div>
             
             <button
@@ -605,93 +674,7 @@ const StudentWelcome: React.FC = () => {
                   </div>
                 )}
 
-                {(selectedExamType === 'AYT' || selectedExamType === 'Tekil') && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ders
-                      </label>
-                      <select
-                        value={examData.subject}
-                        onChange={(e) => setExamData(prev => ({ ...prev, subject: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Ders Seçin</option>
-                        {selectedExamType === 'AYT' ? (
-                          <>
-                            <option value="matematik">Matematik</option>
-                            <option value="fizik">Fizik</option>
-                            <option value="kimya">Kimya</option>
-                            <option value="biyoloji">Biyoloji</option>
-                            <option value="edebiyat">Edebiyat</option>
-                            <option value="tarih">Tarih</option>
-                            <option value="cografya">Coğrafya</option>
-                            <option value="felsefe">Felsefe</option>
-                            <option value="din">Din Kültürü</option>
-                          </>
-                        ) : (
-                          <>
-                            <option value="matematik">Matematik</option>
-                            <option value="turkce">Türkçe</option>
-                            <option value="fizik">Fizik</option>
-                            <option value="kimya">Kimya</option>
-                            <option value="biyoloji">Biyoloji</option>
-                            <option value="edebiyat">Edebiyat</option>
-                            <option value="tarih">Tarih</option>
-                            <option value="cografya">Coğrafya</option>
-                            <option value="felsefe">Felsefe</option>
-                            <option value="din">Din Kültürü</option>
-                          </>
-                        )}
-                      </select>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Doğru Sayısı
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={examData.correct}
-                          onChange={(e) => setExamData(prev => ({ ...prev, correct: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Yanlış Sayısı
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={examData.wrong}
-                          onChange={(e) => setExamData(prev => ({ ...prev, wrong: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Boş Sayısı
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={examData.blank}
-                          onChange={(e) => setExamData(prev => ({ ...prev, blank: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+
 
                 {selectedExamType === 'TYT' && (
                   <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
@@ -731,6 +714,317 @@ const StudentWelcome: React.FC = () => {
                           calculateSubjectTotalNet(tytData.fen) +
                           calculateSubjectTotalNet(tytData.sosyal)
                         ).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedExamType === 'AYT' && (
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-gray-900 mb-3 flex justify-between items-center">
+                        <span>Edebiyat-Sosyal Bilimler 1</span>
+                        <span className="text-sm font-normal text-blue-600">
+                          Toplam Net: {calculateSubjectTotalNet(aytData.edebiyatSosyal).toFixed(2)}
+                        </span>
+                      </h3>
+                      <div className="space-y-4">
+                        {Object.entries(aytData.edebiyatSosyal).map(([subSubject, subData]: [string, any]) => (
+                          <div key={subSubject} className="ml-4">
+                            <h4 className="text-sm font-medium text-gray-700 mb-2 capitalize flex justify-between items-center">
+                              <span>
+                                {subSubject === 'edebiyat' ? 'Edebiyat' : 
+                                 subSubject === 'tarih' ? 'Tarih' : 'Coğrafya'}
+                              </span>
+                              <span className="text-xs font-normal text-green-600">
+                                Net: {calculateNet(subData.correct, subData.wrong).toFixed(2)}
+                              </span>
+                            </h4>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Doğru
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.correct}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    edebiyatSosyal: {
+                                      ...prev.edebiyatSosyal,
+                                      [subSubject]: { ...prev.edebiyatSosyal[subSubject as keyof typeof prev.edebiyatSosyal], correct: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Yanlış
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.wrong}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    edebiyatSosyal: {
+                                      ...prev.edebiyatSosyal,
+                                      [subSubject]: { ...prev.edebiyatSosyal[subSubject as keyof typeof prev.edebiyatSosyal], wrong: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Boş
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.blank}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    edebiyatSosyal: {
+                                      ...prev.edebiyatSosyal,
+                                      [subSubject]: { ...prev.edebiyatSosyal[subSubject as keyof typeof prev.edebiyatSosyal], blank: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-gray-900 mb-3 flex justify-between items-center">
+                        <span>Sosyal Bilimler-2</span>
+                        <span className="text-sm font-normal text-blue-600">
+                          Toplam Net: {calculateSubjectTotalNet(aytData.sosyalBilimler2).toFixed(2)}
+                        </span>
+                      </h3>
+                      <div className="space-y-4">
+                        {Object.entries(aytData.sosyalBilimler2).map(([subSubject, subData]: [string, any]) => (
+                          <div key={subSubject} className="ml-4">
+                            <h4 className="text-sm font-medium text-gray-700 mb-2 capitalize flex justify-between items-center">
+                              <span>
+                                {subSubject === 'tarih' ? 'Tarih' : 
+                                 subSubject === 'cografya' ? 'Coğrafya' : 
+                                 subSubject === 'felsefe' ? 'Felsefe' : 'Din'}
+                              </span>
+                              <span className="text-xs font-normal text-green-600">
+                                Net: {calculateNet(subData.correct, subData.wrong).toFixed(2)}
+                              </span>
+                            </h4>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Doğru
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.correct}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    sosyalBilimler2: {
+                                      ...prev.sosyalBilimler2,
+                                      [subSubject]: { ...prev.sosyalBilimler2[subSubject as keyof typeof prev.sosyalBilimler2], correct: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Yanlış
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.wrong}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    sosyalBilimler2: {
+                                      ...prev.sosyalBilimler2,
+                                      [subSubject]: { ...prev.sosyalBilimler2[subSubject as keyof typeof prev.sosyalBilimler2], wrong: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Boş
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.blank}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    sosyalBilimler2: {
+                                      ...prev.sosyalBilimler2,
+                                      [subSubject]: { ...prev.sosyalBilimler2[subSubject as keyof typeof prev.sosyalBilimler2], blank: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-gray-900 mb-3 flex justify-between items-center">
+                        <span>Matematik</span>
+                        <span className="text-sm font-normal text-blue-600">
+                          Net: {calculateNet(aytData.matematik.correct, aytData.matematik.wrong).toFixed(2)}
+                        </span>
+                      </h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Doğru
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={aytData.matematik.correct}
+                            onChange={(e) => setAytData(prev => ({
+                              ...prev,
+                              matematik: { ...prev.matematik, correct: e.target.value }
+                            }))}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Yanlış
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={aytData.matematik.wrong}
+                            onChange={(e) => setAytData(prev => ({
+                              ...prev,
+                              matematik: { ...prev.matematik, wrong: e.target.value }
+                            }))}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            Boş
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={aytData.matematik.blank}
+                            onChange={(e) => setAytData(prev => ({
+                              ...prev,
+                              matematik: { ...prev.matematik, blank: e.target.value }
+                            }))}
+                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-gray-900 mb-3">Fen Bilimleri</h3>
+                      <div className="space-y-3">
+                        {Object.entries(aytData.fenBilimleri).map(([subSubject, subData]) => (
+                          <div key={subSubject}>
+                            <h4 className="font-medium text-gray-800 mb-2 capitalize flex justify-between items-center">
+                              <span>
+                                {subSubject === 'fizik' ? 'Fizik' : 
+                                 subSubject === 'kimya' ? 'Kimya' : 'Biyoloji'}
+                              </span>
+                              <span className="text-sm font-normal text-green-600">
+                                Net: {calculateNet(subData.correct, subData.wrong).toFixed(2)}
+                              </span>
+                            </h4>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Doğru
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.correct}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    fenBilimleri: {
+                                      ...prev.fenBilimleri,
+                                      [subSubject]: { ...prev.fenBilimleri[subSubject as keyof typeof prev.fenBilimleri], correct: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Yanlış
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.wrong}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    fenBilimleri: {
+                                      ...prev.fenBilimleri,
+                                      [subSubject]: { ...prev.fenBilimleri[subSubject as keyof typeof prev.fenBilimleri], wrong: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                  Boş
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={subData.blank}
+                                  onChange={(e) => setAytData(prev => ({
+                                    ...prev,
+                                    fenBilimleri: {
+                                      ...prev.fenBilimleri,
+                                      [subSubject]: { ...prev.fenBilimleri[subSubject as keyof typeof prev.fenBilimleri], blank: e.target.value }
+                                    }
+                                  }))}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">AYT Net Sayıları</h3>
+                      <div className="text-center p-4 bg-white rounded-lg shadow-sm border-2 border-green-200">
+                        <div className="text-lg font-medium text-gray-700">Toplam Net</div>
+                        <div className="text-3xl font-bold text-green-600">
+                          {(
+                            calculateNet(aytData.matematik.correct, aytData.matematik.wrong) +
+                            calculateSubjectTotalNet(aytData.edebiyatSosyal) +
+                            calculateSubjectTotalNet(aytData.sosyalBilimler2) +
+                            calculateSubjectTotalNet(aytData.fenBilimleri)
+                          ).toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { getStudentExams, getExamStatistics, deleteStudentExam, StudentExam, getStudentIdFromAuthUser } from '../../lib/examService';
-import { ArrowLeft, Calendar, TrendingUp, Target, Award, Trash2, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Calendar, TrendingUp, Target, Award, Trash2, BarChart3, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,19 @@ const StudentExams: React.FC = () => {
   const [statistics, setStatistics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<'ALL' | 'TYT' | 'AYT' | 'LGS'>('ALL');
+  const [expandedExams, setExpandedExams] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (examKey: string) => {
+    setExpandedExams(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(examKey)) {
+        newSet.delete(examKey);
+      } else {
+        newSet.add(examKey);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     if (user?.id) {
@@ -60,9 +73,7 @@ const StudentExams: React.FC = () => {
     return new Date(dateString).toLocaleDateString('tr-TR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
 
@@ -99,6 +110,67 @@ const StudentExams: React.FC = () => {
       </div>
     </div>
   );
+
+  const renderAYTDetails = (aytExams: StudentExam[]) => {
+    const subjects = ['Matematik', 'Edebiyat-Sosyal Bilimler 1', 'Sosyal Bilimler-2', 'Fen Bilimleri'];
+    const examData: { [key: string]: StudentExam } = {};
+    
+    // AYT denemelerini subject'e göre grupla
+    aytExams.forEach(exam => {
+      if (exam.subject_scores?.subject) {
+        examData[exam.subject_scores.subject] = exam;
+      }
+    });
+    
+    return (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b-2 border-gray-300">
+                <th className="text-left p-2 font-semibold text-gray-700">Ders</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Doğru</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Yanlış</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Boş</th>
+                <th className="text-center p-2 font-semibold text-gray-700">Net</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subjects.map(subject => {
+                const exam = examData[subject];
+                return (
+                  <tr key={subject} className="border-b border-gray-200 hover:bg-gray-100">
+                    <td className="p-2 font-medium">{subject}</td>
+                    <td className="p-2 text-center">{exam?.subject_scores?.correct || 0}</td>
+                    <td className="p-2 text-center">{exam?.subject_scores?.wrong || 0}</td>
+                    <td className="p-2 text-center">{exam?.subject_scores?.blank || 0}</td>
+                    <td className="p-2 text-center font-bold text-blue-600">
+                      {exam ? exam.net_score.toFixed(2) : '0.00'}
+                    </td>
+                  </tr>
+                );
+              })}
+              <tr className="border-t-2 border-gray-400 bg-blue-50">
+                <td className="p-2 font-bold">TOPLAM</td>
+                <td className="p-2 text-center font-bold">
+                  {subjects.reduce((sum, subject) => sum + (examData[subject]?.subject_scores?.correct || 0), 0)}
+                </td>
+                <td className="p-2 text-center font-bold">
+                  {subjects.reduce((sum, subject) => sum + (examData[subject]?.subject_scores?.wrong || 0), 0)}
+                </td>
+                <td className="p-2 text-center font-bold">
+                  {subjects.reduce((sum, subject) => sum + (examData[subject]?.subject_scores?.blank || 0), 0)}
+                </td>
+                <td className="p-2 text-center font-bold text-green-600">
+                  {subjects.reduce((sum, subject) => sum + (examData[subject]?.net_score || 0), 0).toFixed(2)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
 
   const renderSingleSubjectDetails = (exam: StudentExam) => (
     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -157,7 +229,9 @@ const StudentExams: React.FC = () => {
               <div className="flex items-center gap-3">
                 <BarChart3 className="w-8 h-8 text-blue-600" />
                 <div>
-                  <p className="text-sm text-gray-600">Toplam Deneme</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedType === 'ALL' ? 'Toplam Deneme' : `${selectedType} Deneme`}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">{statistics.totalExams}</p>
                 </div>
               </div>
@@ -172,7 +246,9 @@ const StudentExams: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Target className="w-8 h-8 text-green-600" />
                 <div>
-                  <p className="text-sm text-gray-600">Ortalama Net</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedType === 'ALL' ? 'Ortalama Net' : `${selectedType} Ortalama`}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">{statistics.averageNet}</p>
                 </div>
               </div>
@@ -187,7 +263,9 @@ const StudentExams: React.FC = () => {
               <div className="flex items-center gap-3">
                 <Award className="w-8 h-8 text-yellow-600" />
                 <div>
-                  <p className="text-sm text-gray-600">En İyi Net</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedType === 'ALL' ? 'En İyi Net' : `${selectedType} En İyi`}
+                  </p>
                   <p className="text-2xl font-bold text-gray-800">{statistics.bestNet}</p>
                 </div>
               </div>
@@ -202,17 +280,26 @@ const StudentExams: React.FC = () => {
               <div className="flex items-center gap-3">
                 <TrendingUp className="w-8 h-8 text-purple-600" />
                 <div>
-                  <p className="text-sm text-gray-600">Son Gelişim</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedType === 'ALL' ? 'Son Gelişim' : `${selectedType} Son Net`}
+                  </p>
                   <p className={`text-2xl font-bold ${
-                    parseFloat(statistics.improvement) >= 0 ? 'text-green-600' : 'text-red-600'
+                    selectedType === 'ALL' 
+                      ? (parseFloat(statistics.improvement) >= 0 ? 'text-green-600' : 'text-red-600')
+                      : 'text-gray-800'
                   }`}>
-                    {parseFloat(statistics.improvement) >= 0 ? '+' : ''}{statistics.improvement}
+                    {selectedType === 'ALL' 
+                      ? `${parseFloat(statistics.improvement) >= 0 ? '+' : ''}${statistics.improvement}`
+                      : statistics.latestNet
+                    }
                   </p>
                 </div>
               </div>
             </motion.div>
           </div>
         )}
+
+
 
         {/* Filter Buttons */}
         <div className="flex gap-2 mb-6 overflow-x-auto">
@@ -240,43 +327,125 @@ const StudentExams: React.FC = () => {
               <p className="text-gray-500">İlk denemenizi eklemek için ana sayfaya dönün.</p>
             </div>
           ) : (
-            exams.map((exam, index) => (
-              <motion.div
-                key={exam.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getExamTypeColor(exam.exam_type)}`}>
-                        {exam.exam_type}
-                      </span>
-                      <h3 className="text-xl font-bold text-gray-800">{exam.exam_name}</h3>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {formatDate(exam.exam_date)}
+            (() => {
+              // AYT denemelerini grupla
+              const groupedExams: { [key: string]: StudentExam[] } = {};
+              const otherExams: StudentExam[] = [];
+              
+              exams.forEach(exam => {
+                if (exam.exam_type === 'AYT') {
+                  const examBaseName = exam.subject_scores?.examName?.split(' - ')[0] || exam.exam_date;
+                  if (!groupedExams[examBaseName]) {
+                    groupedExams[examBaseName] = [];
+                  }
+                  groupedExams[examBaseName].push(exam);
+                } else {
+                  otherExams.push(exam);
+                }
+              });
+              
+              const allDisplayExams = [
+                ...Object.entries(groupedExams).map(([examName, aytExams]) => ({
+                  type: 'AYT_GROUP',
+                  examName,
+                  exams: aytExams,
+                  exam_date: aytExams[0].exam_date,
+                  totalNet: aytExams.reduce((sum, exam) => sum + exam.net_score, 0)
+                })),
+                ...otherExams.map(exam => ({ type: 'SINGLE', exam }))
+              ];
+              
+              return allDisplayExams.map((item, index) => {
+                if (item.type === 'AYT_GROUP') {
+                  return (
+                    <motion.div
+                      key={`ayt-${item.examName}`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div 
+                          className="flex-1 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                          onClick={() => toggleExpanded(item.examName)}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                              AYT
+                            </span>
+                            <h3 className="text-xl font-bold text-gray-800">{item.examName}</h3>
+                            <ChevronDown 
+                              className={`w-5 h-5 text-gray-500 transition-transform ${
+                                expandedExams.has(item.examName) ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(item.exam_date)}
+                            </div>
+                            <div className="font-semibold text-blue-600">
+                              Toplam Net: {item.totalNet.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Tüm AYT denemelerini sil
+                            item.exams.forEach(exam => handleDeleteExam(exam.id));
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
-                      <div className="font-semibold text-blue-600">
-                        Toplam Net: {exam.net_score.toFixed(2)}
+                      {expandedExams.has(item.examName) && renderAYTDetails(item.exams)}
+                    </motion.div>
+                  );
+                } else {
+                  const exam = item.exam;
+                  return (
+                    <motion.div
+                      key={exam.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getExamTypeColor(exam.exam_type)}`}>
+                              {exam.exam_type}
+                            </span>
+                            <h3 className="text-xl font-bold text-gray-800">{exam.subject_scores.examName}</h3>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {formatDate(exam.exam_date)}
+                            </div>
+                            <div className="font-semibold text-blue-600">
+                              Toplam Net: {exam.net_score.toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteExam(exam.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteExam(exam.id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {exam.exam_type === 'TYT' ? renderTYTDetails(exam) : renderSingleSubjectDetails(exam)}
-              </motion.div>
-            ))
+                      {exam.exam_type === 'TYT' ? renderTYTDetails(exam) : renderSingleSubjectDetails(exam)}
+                    </motion.div>
+                  );
+                }
+              });
+            })()
           )}
         </div>
       </div>
