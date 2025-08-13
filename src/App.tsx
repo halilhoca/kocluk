@@ -16,6 +16,7 @@ import StudentAssignments from './pages/student/StudentAssignments';
 import StudentExams from './pages/student/StudentExams';
 import QuestionStats from './pages/student/QuestionStats';
 import PublicReport from './pages/student/PublicReport';
+import SubjectAnalysis from './pages/student/SubjectAnalysis';
 import BookList from './pages/books/BookList';
 import ProgramList from './pages/programs/ProgramList';
 import CreateProgram from './pages/programs/CreateProgram';
@@ -72,6 +73,7 @@ function App() {
         <Route element={user ? <StudentLayout /> : <Navigate to="/student-signin" />}>
           <Route path="/student/welcome" element={<StudentWelcome />} />
           <Route path="/student/assignments" element={<StudentAssignments />} />
+          <Route path="/student/subject-analysis" element={<SubjectAnalysis />} />
           <Route path="/student/exams" element={<StudentExams />} />
           <Route path="/student/question-stats" element={<QuestionStats />} />
         </Route>

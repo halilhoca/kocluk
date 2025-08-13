@@ -1,7 +1,7 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { LogOut, User, BookOpen } from 'lucide-react';
+import { LogOut, User, BookOpen, Home, FileText, BarChart3, HelpCircle, Target } from 'lucide-react';
 import Button from '../ui/Button';
 import { motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 const StudentLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const handleLogout = async () => {
     await logout();
@@ -63,6 +64,73 @@ const StudentLayout: React.FC = () => {
           </div>
         </div>
       </header>
+      
+      {/* Navigasyon Menüsü */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8 overflow-x-auto py-4">
+            <Link
+              to="/student/welcome"
+              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                location.pathname === '/student/welcome'
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Ana Sayfa
+            </Link>
+            
+            <Link
+              to="/student/assignments"
+              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                location.pathname === '/student/assignments'
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Ödevlerim
+            </Link>
+            
+            <Link
+              to="/student/subject-analysis"
+              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                location.pathname === '/student/subject-analysis'
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Konu Analizi
+            </Link>
+            
+            <Link
+              to="/student/exams"
+              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                location.pathname === '/student/exams'
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Sınav Sonuçları
+            </Link>
+            
+            <Link
+              to="/student/question-stats"
+              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                location.pathname === '/student/question-stats'
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Soru İstatistikleri
+            </Link>
+          </div>
+        </div>
+      </nav>
       
       {/* Ana İçerik */}
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

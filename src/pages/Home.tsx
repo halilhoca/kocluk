@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Users, BarChart3, CheckCircle, Star, ArrowRight } from 'lucide-react';
+import { BookOpen, Users, BarChart3, CheckCircle, Star, ArrowRight, Target, TrendingUp, Award } from 'lucide-react';
 
 const Home: React.FC = () => {
   const features = [
@@ -105,6 +105,61 @@ const Home: React.FC = () => {
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Subject Analysis Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Konu Analizi</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Hangi konularda ne kadar ilerlediğinizi takip edin ve eksik alanlarınızı keşfedin.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition duration-300 border border-gray-100">
+              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-6 mx-auto">
+                <Target className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">Hedef Belirleme</h3>
+              <p className="text-gray-600 text-center leading-relaxed">
+                Her ders için konu bazlı hedefler belirleyin ve ilerlemenizi takip edin.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition duration-300 border border-gray-100">
+              <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-2xl mb-6 mx-auto">
+                <TrendingUp className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">İlerleme Takibi</h3>
+              <p className="text-gray-600 text-center leading-relaxed">
+                Tamamladığınız konuları işaretleyin ve genel ilerlemenizi görüntüleyin.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition duration-300 border border-gray-100">
+              <div className="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-2xl mb-6 mx-auto">
+                <Award className="h-8 w-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4 text-center">Başarı Analizi</h3>
+              <p className="text-gray-600 text-center leading-relaxed">
+                Güçlü ve zayıf olduğunuz konuları analiz edin, odaklanmanız gereken alanları keşfedin.
+              </p>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <Link
+              to="/student-signin"
+              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              <BookOpen className="h-5 w-5 mr-2" />
+              Konu Analizine Başla
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Link>
           </div>
         </div>
       </section>
