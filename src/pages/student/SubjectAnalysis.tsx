@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronRight, CheckCircle, Circle, BookOpen, TrendingUp, Target, Award, BarChart3 } from 'lucide-react';
+import { ChevronRight, CheckCircle, Circle, BookOpen, TrendingUp, Target, Award, BarChart3, Star, Zap, Trophy, Brain } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Topic {
   id: string;
@@ -131,90 +132,137 @@ const SubjectAnalysis: React.FC = () => {
 
   if (selectedSubject) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border border-white/50"
+          >
             <button
               onClick={() => setSelectedSubject(null)}
-              className="flex items-center text-gray-600 hover:text-gray-800 mb-4 transition-colors"
+              className="flex items-center text-gray-600 hover:text-purple-600 mb-6 transition-all duration-300 group"
             >
-              <ChevronRight className="h-5 w-5 rotate-180 mr-2" />
-              Geri Dön
+              <div className="bg-gray-100 group-hover:bg-purple-100 rounded-full p-2 mr-3 transition-colors">
+                <ChevronRight className="h-5 w-5 rotate-180" />
+              </div>
+              <span className="font-medium">Geri Dön</span>
             </button>
             
-            <div className="flex items-center mb-4">
-              <div className={`w-16 h-16 ${selectedSubject.color} rounded-2xl flex items-center justify-center text-2xl mr-4`}>
+            <div className="flex items-center mb-6">
+              <div className={`w-20 h-20 ${selectedSubject.color} rounded-3xl flex items-center justify-center text-3xl mr-6 shadow-lg`}>
                 {selectedSubject.icon}
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{selectedSubject.name}</h1>
-                <p className="text-gray-600">Konu İlerlemesi</p>
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">{selectedSubject.name}</h1>
+                <p className="text-gray-600 text-lg font-medium">Konu İlerleme Takibi</p>
               </div>
+              {selectedSubject.progress >= 80 && (
+                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl p-3">
+                  <Trophy className="h-8 w-8 text-white" />
+                </div>
+              )}
             </div>
             
             {/* Progress Bar */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">İlerleme</span>
-                <span className="text-sm font-bold text-gray-900">{selectedSubject.progress}%</span>
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-lg font-semibold text-gray-700">İlerleme Durumu</span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{selectedSubject.progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className={`h-3 rounded-full ${selectedSubject.color} transition-all duration-500`}
-                  style={{ width: `${selectedSubject.progress}%` }}
-                ></div>
+              <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${selectedSubject.progress}%` }}
+                  transition={{ duration: 1.5 }}
+                  className={`h-4 rounded-full bg-gradient-to-r ${selectedSubject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
+                ></motion.div>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 text-center">
+                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-emerald-600 mb-1">
                   {selectedSubject.topics.filter(t => t.completed).length}
                 </div>
-                <div className="text-sm text-gray-600">Tamamlanan</div>
+                <div className="text-sm text-emerald-700 font-medium">Tamamlanan Konu</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 text-center">
+                <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Circle className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold text-orange-600 mb-1">
                   {selectedSubject.topics.filter(t => !t.completed).length}
                 </div>
-                <div className="text-sm text-gray-600">Kalan</div>
+                <div className="text-sm text-orange-700 font-medium">Kalan Konu</div>
               </div>
             </div>
-          </div>
+          </motion.div>
           
           {/* Topics List */}
-          <div className="space-y-3">
-            {selectedSubject.topics.map((topic) => (
-              <div
+          <div className="space-y-4">
+            {selectedSubject.topics.map((topic, index) => (
+              <motion.div
                 key={topic.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 * index }}
                 onClick={() => toggleTopic(topic.id)}
-                className={`bg-white rounded-xl p-4 shadow-sm border-2 transition-all duration-200 cursor-pointer hover:shadow-md ${
+                className={`group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl transform hover:scale-[1.02] ${
                   topic.completed 
-                    ? 'border-green-200 bg-green-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50' 
+                    : 'border-gray-200 hover:border-purple-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    {topic.completed ? (
-                      <CheckCircle className="h-6 w-6 text-green-500 mr-3" />
-                    ) : (
-                      <Circle className="h-6 w-6 text-gray-400 mr-3" />
-                    )}
-                    <span className={`font-medium ${
-                      topic.completed ? 'text-green-800' : 'text-gray-900'
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-4 transition-all duration-300 ${
+                      topic.completed 
+                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg' 
+                        : 'bg-gray-200 group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400'
                     }`}>
-                      {topic.name}
-                    </span>
-                  </div>
-                  {topic.completed && (
-                    <div className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                      Tamamlandı
+                      {topic.completed ? (
+                        <CheckCircle className="h-6 w-6 text-white" />
+                      ) : (
+                        <Circle className="h-6 w-6 text-gray-500 group-hover:text-white transition-colors" />
+                      )}
                     </div>
-                  )}
+                    <div>
+                      <span className={`text-lg font-semibold transition-colors ${
+                        topic.completed ? 'text-emerald-800' : 'text-gray-900 group-hover:text-purple-700'
+                      }`}>
+                        {topic.name}
+                      </span>
+                      <p className={`text-sm mt-1 ${
+                        topic.completed ? 'text-emerald-600' : 'text-gray-500'
+                      }`}>
+                        {topic.completed ? 'Başarıyla tamamlandı' : 'Henüz tamamlanmadı'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    {topic.completed && (
+                      <motion.div 
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center"
+                      >
+                        <Star className="h-4 w-4 mr-1" />
+                        Tamamlandı
+                      </motion.div>
+                    )}
+                    <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      topic.completed 
+                        ? 'bg-emerald-500 shadow-lg' 
+                        : 'bg-gray-300 group-hover:bg-purple-400'
+                    }`}></div>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -223,102 +271,139 @@ const SubjectAnalysis: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Konu Analizi</h1>
-          <p className="text-gray-600">Hangi konularda ne kadar ilerlediğinizi takip edin</p>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl mb-6 shadow-lg">
+            <Brain className="h-10 w-10 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">Konu Analizi</h1>
+          <p className="text-gray-600 text-lg">Hangi konularda ne kadar ilerlediğinizi takip edin ve hedeflerinize ulaşın</p>
+        </motion.div>
         
         {/* Overall Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Target className="h-6 w-6 text-blue-600" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+          >
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Target className="h-7 w-7 text-white" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{getOverallProgress()}%</div>
-            <div className="text-sm text-gray-600">Genel İlerleme</div>
-          </div>
+            <div className="text-3xl font-bold mb-2">{getOverallProgress()}%</div>
+            <div className="text-blue-100 font-medium">Genel İlerleme</div>
+          </motion.div>
           
-          <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <BookOpen className="h-6 w-6 text-green-600" />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+          >
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="h-7 w-7 text-white" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">{subjects.length}</div>
-            <div className="text-sm text-gray-600">Toplam Ders</div>
-          </div>
+            <div className="text-3xl font-bold mb-2">{subjects.length}</div>
+            <div className="text-emerald-100 font-medium">Toplam Ders</div>
+          </motion.div>
           
-          <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+          >
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Zap className="h-7 w-7 text-white" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-3xl font-bold mb-2">
               {subjects.reduce((sum, subject) => sum + subject.topics.filter(t => t.completed).length, 0)}
             </div>
-            <div className="text-sm text-gray-600">Tamamlanan Konu</div>
-          </div>
+            <div className="text-purple-100 font-medium">Tamamlanan Konu</div>
+          </motion.div>
           
-          <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
-            <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Award className="h-6 w-6 text-orange-600" />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+          >
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trophy className="h-7 w-7 text-white" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-3xl font-bold mb-2">
               {subjects.filter(s => s.progress >= 80).length}
             </div>
-            <div className="text-sm text-gray-600">Başarılı Ders</div>
-          </div>
+            <div className="text-amber-100 font-medium">Başarılı Ders</div>
+          </motion.div>
         </div>
         
         {/* Subjects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {subjects.map((subject) => (
-            <div
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {subjects.map((subject, index) => (
+            <motion.div
               key={subject.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 * index }}
               onClick={() => setSelectedSubject(subject)}
-              className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-gray-100"
+              className="group bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-105 border border-white/50 hover:bg-white/90"
             >
-              <div className="flex items-center mb-4">
-                <div className={`w-14 h-14 ${subject.color} rounded-2xl flex items-center justify-center text-2xl mr-4`}>
+              <div className="flex items-center mb-6">
+                <div className={`w-16 h-16 ${subject.color} rounded-3xl flex items-center justify-center text-3xl mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   {subject.icon}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{subject.name}</h3>
-                  <p className="text-sm text-gray-600">{subject.topics.length} konu</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">{subject.name}</h3>
+                  <p className="text-sm text-gray-500 font-medium">{subject.topics.length} konu mevcut</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-2 group-hover:scale-110 transition-transform duration-300">
+                  <ChevronRight className="h-5 w-5 text-white" />
+                </div>
               </div>
               
               {/* Progress */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">İlerleme</span>
-                  <span className="text-sm font-bold text-gray-900">{subject.progress}%</span>
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-semibold text-gray-700">İlerleme Durumu</span>
+                  <div className="flex items-center">
+                    {subject.progress >= 80 && <Star className="h-4 w-4 text-yellow-500 mr-1" />}
+                    <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{subject.progress}%</span>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full ${subject.color} transition-all duration-500`}
-                    style={{ width: `${subject.progress}%` }}
-                  ></div>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${subject.progress}%` }}
+                    transition={{ duration: 1, delay: 0.2 * index }}
+                    className={`h-3 rounded-full bg-gradient-to-r ${subject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
+                  ></motion.div>
                 </div>
               </div>
               
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <div className="text-lg font-bold text-green-600">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-emerald-600 mb-1">
                     {subject.topics.filter(t => t.completed).length}
                   </div>
-                  <div className="text-xs text-gray-600">Tamamlanan</div>
+                  <div className="text-xs text-emerald-700 font-medium">Tamamlanan</div>
                 </div>
-                <div>
-                  <div className="text-lg font-bold text-orange-600">
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 text-center">
+                  <div className="text-2xl font-bold text-orange-600 mb-1">
                     {subject.topics.filter(t => !t.completed).length}
                   </div>
-                  <div className="text-xs text-gray-600">Kalan</div>
+                  <div className="text-xs text-orange-700 font-medium">Kalan</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
