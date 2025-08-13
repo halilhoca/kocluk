@@ -346,7 +346,7 @@ const SubjectAnalysis: React.FC = () => {
         </div>
         
         {/* Subjects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {subjects.map((subject, index) => (
             <motion.div
               key={subject.id}
@@ -354,50 +354,47 @@ const SubjectAnalysis: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
               onClick={() => setSelectedSubject(subject)}
-              className="group bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-105 border border-white/50 hover:bg-white/90"
+              className="group bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-white/50 hover:bg-white/90"
             >
-              <div className="flex items-center mb-6">
-                <div className={`w-16 h-16 ${subject.color} rounded-3xl flex items-center justify-center text-3xl mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+              <div className="flex items-center mb-4">
+                <div className={`w-12 h-12 ${subject.color} rounded-2xl flex items-center justify-center text-2xl mr-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
                   {subject.icon}
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">{subject.name}</h3>
-                  <p className="text-sm text-gray-500 font-medium">{subject.topics.length} konu mevcut</p>
-                </div>
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-2 group-hover:scale-110 transition-transform duration-300">
-                  <ChevronRight className="h-5 w-5 text-white" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors truncate">{subject.name}</h3>
+                  <p className="text-xs text-gray-500 font-medium">{subject.topics.length} konu</p>
                 </div>
               </div>
               
               {/* Progress */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-semibold text-gray-700">İlerleme Durumu</span>
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold text-gray-700">İlerleme</span>
                   <div className="flex items-center">
-                    {subject.progress >= 80 && <Star className="h-4 w-4 text-yellow-500 mr-1" />}
-                    <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{subject.progress}%</span>
+                    {subject.progress >= 80 && <Star className="h-3 w-3 text-yellow-500 mr-1" />}
+                    <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{subject.progress}%</span>
                   </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${subject.progress}%` }}
                     transition={{ duration: 1, delay: 0.2 * index }}
-                    className={`h-3 rounded-full bg-gradient-to-r ${subject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
+                    className={`h-2 rounded-full bg-gradient-to-r ${subject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
                   ></motion.div>
                 </div>
               </div>
               
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-4 text-center">
-                  <div className="text-2xl font-bold text-emerald-600 mb-1">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-2 text-center">
+                  <div className="text-lg font-bold text-emerald-600 mb-0">
                     {subject.topics.filter(t => t.completed).length}
                   </div>
-                  <div className="text-xs text-emerald-700 font-medium">Tamamlanan</div>
+                  <div className="text-xs text-emerald-700 font-medium">Tamam</div>
                 </div>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 text-center">
-                  <div className="text-2xl font-bold text-orange-600 mb-1">
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-2 text-center">
+                  <div className="text-lg font-bold text-orange-600 mb-0">
                     {subject.topics.filter(t => !t.completed).length}
                   </div>
                   <div className="text-xs text-orange-700 font-medium">Kalan</div>
