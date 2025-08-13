@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { User, LogOut, Calculator, X, BookOpen } from 'lucide-react';
+import { User, LogOut, Calculator, X, BookOpen, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button from '../../components/ui/Button';
 import { saveTYTExam, saveSingleSubjectExam, getStudentIdFromAuthUser } from '../../lib/examService';
@@ -330,7 +330,29 @@ const StudentWelcome: React.FC = () => {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-3xl shadow-xl p-8 text-center hover:shadow-2xl transition-all duration-300 transform hover:scale-105 lg:col-span-1 sm:col-span-2"
+            className="bg-white rounded-3xl shadow-xl p-8 text-center hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+          >
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+              <Target size={40} className="text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Konu Analizi</h3>
+            <p className="text-gray-600 mb-8">
+              Konuları takip et, tamamladığın konuları işaretle ve ilerleme durumunu gör.
+            </p>
+            <button
+              onClick={() => navigate('/student/subject-analysis')}
+              className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center text-sm sm:text-base"
+            >
+              <Target size={20} className="mr-2" />
+              Konu Analizim
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white rounded-3xl shadow-xl p-8 text-center hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
           >
             <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
