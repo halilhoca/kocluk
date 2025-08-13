@@ -324,6 +324,7 @@ const StudentExams: React.FC = () => {
     </div>
   );
 
+<<<<<<< HEAD
   // Çizgi grafiği için veri hazırlama fonksiyonu
   const prepareChartData = () => {
     if (!exams || exams.length === 0) return null;
@@ -471,6 +472,8 @@ const StudentExams: React.FC = () => {
     },
   };
 
+=======
+>>>>>>> 7bfbfc08bf4c961bc57d96a1cf910f4045217381
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -743,6 +746,7 @@ const StudentExams: React.FC = () => {
             })()
           )}
         </div>
+<<<<<<< HEAD
 
         {/* Çizgi Grafiği */}
         {prepareChartData() && (
@@ -757,6 +761,8 @@ const StudentExams: React.FC = () => {
             </div>
           </motion.div>
         )}
+=======
+>>>>>>> 7bfbfc08bf4c961bc57d96a1cf910f4045217381
       </div>
     </div>
   );
