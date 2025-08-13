@@ -287,61 +287,61 @@ const SubjectAnalysis: React.FC = () => {
         </motion.div>
         
         {/* Overall Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 shadow-lg text-center text-white transform hover:scale-105 transition-all duration-300"
           >
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Target className="h-7 w-7 text-white" />
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Target className="h-5 w-5 text-white" />
             </div>
-            <div className="text-3xl font-bold mb-2">{getOverallProgress()}%</div>
-            <div className="text-blue-100 font-medium">Genel İlerleme</div>
+            <div className="text-2xl font-bold mb-1">{getOverallProgress()}%</div>
+            <div className="text-blue-100 text-sm font-medium">Genel İlerleme</div>
           </motion.div>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 shadow-lg text-center text-white transform hover:scale-105 transition-all duration-300"
           >
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="h-7 w-7 text-white" />
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
+              <BookOpen className="h-5 w-5 text-white" />
             </div>
-            <div className="text-3xl font-bold mb-2">{subjects.length}</div>
-            <div className="text-emerald-100 font-medium">Toplam Ders</div>
+            <div className="text-2xl font-bold mb-1">{subjects.length}</div>
+            <div className="text-emerald-100 text-sm font-medium">Toplam Ders</div>
           </motion.div>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 shadow-lg text-center text-white transform hover:scale-105 transition-all duration-300"
           >
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Zap className="h-7 w-7 text-white" />
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Zap className="h-5 w-5 text-white" />
             </div>
-            <div className="text-3xl font-bold mb-2">
+            <div className="text-2xl font-bold mb-1">
               {subjects.reduce((sum, subject) => sum + subject.topics.filter(t => t.completed).length, 0)}
             </div>
-            <div className="text-purple-100 font-medium">Tamamlanan Konu</div>
+            <div className="text-purple-100 text-sm font-medium">Tamamlanan Konu</div>
           </motion.div>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl p-6 shadow-xl text-center text-white transform hover:scale-105 transition-all duration-300"
+            className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-4 shadow-lg text-center text-white transform hover:scale-105 transition-all duration-300"
           >
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Trophy className="h-7 w-7 text-white" />
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Trophy className="h-5 w-5 text-white" />
             </div>
-            <div className="text-3xl font-bold mb-2">
+            <div className="text-2xl font-bold mb-1">
               {subjects.filter(s => s.progress >= 80).length}
             </div>
-            <div className="text-amber-100 font-medium">Başarılı Ders</div>
+            <div className="text-amber-100 text-sm font-medium">Başarılı Ders</div>
           </motion.div>
         </div>
         
