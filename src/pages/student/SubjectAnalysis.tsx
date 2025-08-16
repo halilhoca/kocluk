@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronRight, CheckCircle, Circle, BookOpen, TrendingUp, Target, Award, BarChart3, Star, Zap, Trophy, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -19,7 +19,18 @@ interface Subject {
 
 const SubjectAnalysis: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [subjects, setSubjects] = useState<Subject[]>([
+  
+  // Load subjects from localStorage or use default data
+  const getInitialSubjects = (): Subject[] => {
+    const saved = localStorage.getItem('subjects');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.error('Error parsing saved subjects:', error);
+      }
+    }
+    return [
     {
       id: '1',
       name: 'Matematik',
@@ -34,7 +45,8 @@ const SubjectAnalysis: React.FC = () => {
         { id: '5', name: 'Denklemler', completed: false },
         { id: '6', name: 'Eşitsizlikler', completed: false },
         { id: '7', name: 'Fonksiyonlar', completed: false },
-        { id: '8', name: 'Geometri', completed: false }
+        { id: '8', name: 'Geometri', completed: false },
+        { id: '9', name: 'Geometri', completed: false }
       ]
     },
     {
@@ -103,7 +115,15 @@ const SubjectAnalysis: React.FC = () => {
         { id: '8', name: 'Phrasal Verbs', completed: false }
       ]
     }
-  ]);
+  ];
+};
+
+  const [subjects, setSubjects] = useState<Subject[]>(getInitialSubjects);
+
+  // Save subjects to localStorage whenever subjects change
+  useEffect(() => {
+    localStorage.setItem('subjects', JSON.stringify(subjects));
+  }, [subjects]);
 
   const toggleTopic = (topicId: string) => {
     if (!selectedSubject) return;
