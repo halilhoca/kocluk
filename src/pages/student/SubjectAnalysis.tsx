@@ -19,7 +19,7 @@ interface Subject {
 
 const SubjectAnalysis: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [subjects] = useState<Subject[]>([
+  const [subjects, setSubjects] = useState<Subject[]>([
     {
       id: '1',
       name: 'Matematik',
@@ -115,11 +115,19 @@ const SubjectAnalysis: React.FC = () => {
     const completedCount = updatedTopics.filter(topic => topic.completed).length;
     const progress = Math.round((completedCount / updatedTopics.length) * 100);
     
-    setSelectedSubject({
+    const updatedSelectedSubject = {
       ...selectedSubject,
       topics: updatedTopics,
       progress
-    });
+    };
+    
+    // Update both selectedSubject and subjects array
+    setSelectedSubject(updatedSelectedSubject);
+    setSubjects(prevSubjects => 
+      prevSubjects.map(subject => 
+        subject.id === selectedSubject.id ? updatedSelectedSubject : subject
+      )
+    );
   };
 
   const getOverallProgress = () => {
