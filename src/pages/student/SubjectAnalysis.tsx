@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, CheckCircle, Circle, BookOpen, TrendingUp, Target, Award, BarChart3, Star, Zap, Trophy, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { BookOpen, Calculator, Globe, Beaker, Atom, Dna, TrendingUp, Star, ChevronDown, ArrowLeft } from 'lucide-react';
 
 interface Topic {
   id: string;
@@ -11,169 +11,455 @@ interface Topic {
 interface Subject {
   id: string;
   name: string;
+  icon: React.ReactNode;
   color: string;
-  icon: string;
   progress: number;
   topics: Topic[];
+  category: 'TYT' | 'AYT';
 }
 
+const getInitialSubjects = (): Subject[] => [
+  {
+    id: 'math',
+    name: 'Matematik',
+    icon: <Calculator />,
+    color: 'bg-blue-500',
+    progress: 20,
+    category: 'TYT',
+    topics: [
+      { id: 'math-1', name: 'Temel Kavramlar', completed: true },
+      { id: 'math-2', name: 'Tek Çift Sayılar', completed: true },
+      { id: 'math-3', name: 'Ardışık Sayılar', completed: true },
+      { id: 'math-4', name: 'Asal Sayılar', completed: true },
+      { id: 'math-5', name: 'Faktöriyel Kavramı', completed: true },
+      { id: 'math-6', name: 'Sayı Basamakları', completed: true },
+      { id: 'math-7', name: 'Bölme Bölünebilme', completed: true },
+      { id: 'math-8', name: 'EBOB EKOK', completed: false },
+      { id: 'math-9', name: 'Rasyonel Sayılar', completed: false },
+      { id: 'math-10', name: '1.Dereceden Denklemler', completed: false },
+      { id: 'math-11', name: 'Basit Eşitsizlikler', completed: false },
+      { id: 'math-12', name: 'Mutlak Değer', completed: false },
+      { id: 'math-13', name: 'Üslü Sayılar', completed: false },
+      { id: 'math-14', name: 'Köklü Sayılar', completed: false },
+      { id: 'math-15', name: 'Çarpanlara Ayırma', completed: false },
+      { id: 'math-16', name: 'Oran Orantı', completed: false },
+      { id: 'math-17', name: 'Sayı Problemleri', completed: false },
+      { id: 'math-18', name: 'Kesir Problemleri', completed: false },
+      { id: 'math-19', name: 'Yaş Problemleri', completed: false },
+      { id: 'math-20', name: 'İşçi Problemleri', completed: false },
+      { id: 'math-21', name: 'Yüzde Problemleri', completed: false },
+      { id: 'math-22', name: 'Kar Zarar Problemleri', completed: false },
+      { id: 'math-23', name: 'Karışım Problemleri', completed: false },
+      { id: 'math-24', name: 'Hareket Problemleri', completed: false },
+      { id: 'math-25', name: 'Grafik Problemleri', completed: false },
+      { id: 'math-26', name: 'Mantık', completed: false },
+      { id: 'math-27', name: 'Kümeler', completed: false },
+      { id: 'math-28', name: 'Fonksiyonlar', completed: false },
+      { id: 'math-29', name: 'Permütasyon', completed: false },
+      { id: 'math-30', name: 'Kombinasyon', completed: false },
+      { id: 'math-31', name: 'Binom Açılımı', completed: false },
+      { id: 'math-32', name: 'Olasılık', completed: false },
+      { id: 'math-33', name: 'Veri Analizi', completed: false },
+      { id: 'math-34', name: 'Polinomlar', completed: false }
+    ]
+  },
+  {
+    id: 'turkish',
+    name: 'Türkçe',
+    icon: <BookOpen />,
+    color: 'bg-green-500',
+    progress: 25,
+    category: 'TYT',
+    topics: [
+      { id: 'turkish-1', name: 'Sözcükte Anlam', completed: true },
+      { id: 'turkish-2', name: 'Söz Yorumu', completed: true },
+      { id: 'turkish-3', name: 'Deyim ve Atasözü', completed: true },
+      { id: 'turkish-4', name: 'Cümlede Anlam', completed: true },
+      { id: 'turkish-5', name: 'Paragraf', completed: true },
+      { id: 'turkish-6', name: 'Paragrafta Anlatım Teknikleri', completed: true },
+      { id: 'turkish-7', name: 'Paragrafta Düşünceyi Geliştirme Yolları', completed: true },
+      { id: 'turkish-8', name: 'Paragrafta Yapı', completed: false },
+      { id: 'turkish-9', name: 'Paragrafta Konu-Ana Düşünce', completed: false },
+      { id: 'turkish-10', name: 'Paragrafta Yardımcı Düşünce', completed: false },
+      { id: 'turkish-11', name: 'Ses Bilgisi', completed: false },
+      { id: 'turkish-12', name: 'Yazım Kuralları', completed: false },
+      { id: 'turkish-13', name: 'Noktalama İşaretleri', completed: false },
+      { id: 'turkish-14', name: 'Sözcükte Yapı/Ekler', completed: false },
+      { id: 'turkish-15', name: 'Sözcük Türleri', completed: false },
+      { id: 'turkish-16', name: 'İsimler', completed: false },
+      { id: 'turkish-17', name: 'Zamirler', completed: false },
+      { id: 'turkish-18', name: 'Sıfatlar', completed: false },
+      { id: 'turkish-19', name: 'Zarflar', completed: false },
+      { id: 'turkish-20', name: 'Edat – Bağlaç – Ünlem', completed: false },
+      { id: 'turkish-21', name: 'Fiiller', completed: false },
+      { id: 'turkish-22', name: 'Fiilde Anlam (Kip-Kişi-Yapı)', completed: false },
+      { id: 'turkish-23', name: 'Ek Fiil', completed: false },
+      { id: 'turkish-24', name: 'Fiilimsi', completed: false },
+      { id: 'turkish-25', name: 'Fiilde Çatı', completed: false },
+      { id: 'turkish-26', name: 'Sözcük Grupları', completed: false },
+      { id: 'turkish-27', name: 'Cümlenin Ögeleri', completed: false },
+      { id: 'turkish-28', name: 'Cümle Türleri', completed: false },
+      { id: 'turkish-29', name: 'Anlatım Bozukluğu', completed: false }
+    ]
+  },
+  {
+    id: 'history',
+    name: 'Tarih',
+    icon: <Globe />,
+    color: 'bg-amber-600',
+    progress: 20,
+    category: 'TYT',
+    topics: [
+      { id: 'history-1', name: 'Tarih ve Zaman', completed: true },
+      { id: 'history-2', name: 'İnsanlığın İlk Dönemleri', completed: true },
+      { id: 'history-3', name: 'Ortaçağ\'da Dünya', completed: true },
+      { id: 'history-4', name: 'İlk ve Orta Çağlarda Türk Dünyası', completed: true },
+      { id: 'history-5', name: 'İslam Medeniyetinin Doğuşu', completed: true },
+      { id: 'history-6', name: 'İlk Türk İslam Devletleri', completed: false },
+      { id: 'history-7', name: 'Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi', completed: false },
+      { id: 'history-8', name: 'Beylikten Devlete Osmanlı Siyaseti(1300-1453)', completed: false },
+      { id: 'history-9', name: 'Dünya Gücü Osmanlı Devleti (1453-1600)', completed: false },
+      { id: 'history-10', name: 'Yeni Çağ Avrupa Tarihi', completed: false },
+      { id: 'history-11', name: 'Yakın Çağ Avrupa Tarihi', completed: false },
+      { id: 'history-12', name: 'Osmanlı Devletinde Arayış Yılları', completed: false },
+      { id: 'history-13', name: '18. Yüzyılda Değişim ve Diplomasi', completed: false },
+      { id: 'history-14', name: 'En Uzun Yüzyıl', completed: false },
+      { id: 'history-15', name: 'Osmanlı Kültür ve Medeniyeti', completed: false },
+      { id: 'history-16', name: '20. Yüzyılda Osmanlı Devleti', completed: false },
+      { id: 'history-17', name: 'I. Dünya Savaşı', completed: false },
+      { id: 'history-18', name: 'Mondros Ateşkesi, İşgaller ve Cemiyetler', completed: false },
+      { id: 'history-19', name: 'Kurtuluş Savaşına Hazırlık Dönemi', completed: false },
+      { id: 'history-20', name: 'I. TBMM Dönemi', completed: false },
+      { id: 'history-21', name: 'Kurtuluş Savaşı ve Antlaşmalar', completed: false },
+      { id: 'history-22', name: 'II. TBMM Dönemi ve Çok Partili Hayata Geçiş', completed: false },
+      { id: 'history-23', name: 'Türk İnkılabı', completed: false },
+      { id: 'history-24', name: 'Atatürk İlkeleri', completed: false },
+      { id: 'history-25', name: 'Atatürk Dönemi Türk Dış Politikası', completed: false }
+    ]
+  },
+  {
+    id: 'geography',
+    name: 'Coğrafya',
+    icon: <Globe />,
+    color: 'bg-emerald-600',
+    progress: 25,
+    category: 'TYT',
+    topics: [
+      { id: 'geography-1', name: 'Doğa ve İnsan', completed: true },
+      { id: 'geography-2', name: 'Dünya\'nın Şekli ve Hareketleri', completed: true },
+      { id: 'geography-3', name: 'Coğrafi Konum', completed: true },
+      { id: 'geography-4', name: 'Harita Bilgisi', completed: true },
+      { id: 'geography-5', name: 'Atmosfer ve Sıcaklık', completed: true },
+      { id: 'geography-6', name: 'İklimler', completed: false },
+      { id: 'geography-7', name: 'Basınç ve Rüzgarlar', completed: false },
+      { id: 'geography-8', name: 'Nem, Yağış ve Buharlaşma', completed: false },
+      { id: 'geography-9', name: 'İç Kuvvetler / Dış Kuvvetler', completed: false },
+      { id: 'geography-10', name: 'Su – Toprak ve Bitkiler', completed: false },
+      { id: 'geography-11', name: 'Nüfus', completed: false },
+      { id: 'geography-12', name: 'Göç', completed: false },
+      { id: 'geography-13', name: 'Yerleşme', completed: false },
+      { id: 'geography-14', name: 'Türkiye\'nin Yer Şekilleri', completed: false },
+      { id: 'geography-15', name: 'Ekonomik Faaliyetler', completed: false },
+      { id: 'geography-16', name: 'Bölgeler', completed: false },
+      { id: 'geography-17', name: 'Uluslararası Ulaşım Hatları', completed: false },
+      { id: 'geography-18', name: 'Çevre ve Toplum', completed: false },
+      { id: 'geography-19', name: 'Doğal Afetler', completed: false }
+    ]
+  },
+  {
+    id: 'philosophy',
+    name: 'Felsefe',
+    icon: <Globe />,
+    color: 'bg-indigo-600',
+    progress: 22,
+    category: 'TYT',
+    topics: [
+      { id: 'philosophy-1', name: 'Felsefenin Konusu', completed: true },
+      { id: 'philosophy-2', name: 'Bilgi Felsefesi', completed: true },
+      { id: 'philosophy-3', name: 'Varlık Felsefesi', completed: false },
+      { id: 'philosophy-4', name: 'Din, Kültür ve Medniyet', completed: false },
+      { id: 'philosophy-5', name: 'Ahlak Felsefesi', completed: false },
+      { id: 'philosophy-6', name: 'Sanat Felsefesi', completed: false },
+      { id: 'philosophy-7', name: 'Din Felsefesi', completed: false },
+      { id: 'philosophy-8', name: 'Siyaset Felsefesi', completed: false },
+      { id: 'philosophy-9', name: 'Bilim Felsefesi', completed: false }
+    ]
+  },
+  {
+    id: 'religion',
+    name: 'Din Kültürü ve Ahlak Bilgisi',
+    icon: <Globe />,
+    color: 'bg-teal-600',
+    progress: 25,
+    category: 'TYT',
+    topics: [
+      { id: 'religion-1', name: 'İnanç', completed: true },
+      { id: 'religion-2', name: 'İbadet', completed: true },
+      { id: 'religion-3', name: 'Ahlak ve Değerler', completed: true },
+      { id: 'religion-4', name: 'Din, Kültür ve Medniyet', completed: true },
+      { id: 'religion-5', name: 'Hz. Mhammed (S.A.V.)', completed: false },
+      { id: 'religion-6', name: 'Vahiy ve Akıl', completed: false },
+      { id: 'religion-7', name: 'Dünya ve Ahiret', completed: false },
+      { id: 'religion-8', name: 'Kur\'an\'a göre Hz. Muhammed (S.A.V.)', completed: false },
+      { id: 'religion-9', name: 'İnançla İlgili Meseleler', completed: false },
+      { id: 'religion-10', name: 'Yahudilik ve Hristiyanlık', completed: false },
+      { id: 'religion-11', name: 'İslam ve Bilim', completed: false },
+      { id: 'religion-12', name: 'Anadolu da İslam', completed: false },
+      { id: 'religion-13', name: 'İslam Düşüncesinde Tasavvufi Yorumlar', completed: false },
+      { id: 'religion-14', name: 'Güncel Dini Meseler', completed: false },
+      { id: 'religion-15', name: 'Hint ve Çin Dinleri', completed: false }
+    ]
+  },
+  {
+    id: 'tyt-physics',
+    name: 'Fizik',
+    icon: <Atom />,
+    color: 'bg-blue-600',
+    progress: 30,
+    category: 'TYT',
+    topics: [
+      { id: 'tyt-physics-1', name: 'Fizik Bilimine Giriş', completed: true },
+      { id: 'tyt-physics-2', name: 'Madde ve Özellikleri', completed: true },
+      { id: 'tyt-physics-3', name: 'Sıvıların Kaldırma Kuvveti', completed: true },
+      { id: 'tyt-physics-4', name: 'Basınç', completed: false },
+      { id: 'tyt-physics-5', name: 'Isı, Sıcaklık ve Genleşme', completed: false },
+      { id: 'tyt-physics-6', name: 'Hareket ve Kuvvet', completed: false },
+      { id: 'tyt-physics-7', name: 'Dinamik', completed: false },
+      { id: 'tyt-physics-8', name: 'İş, Güç ve Enerji', completed: false },
+      { id: 'tyt-physics-9', name: 'Elektrik', completed: false },
+      { id: 'tyt-physics-10', name: 'Manyetizma', completed: false },
+      { id: 'tyt-physics-11', name: 'Dalgalar', completed: false },
+      { id: 'tyt-physics-12', name: 'Optik', completed: false }
+    ]
+  },
+  {
+    id: 'tyt-chemistry',
+    name: 'Kimya',
+    icon: <Beaker />,
+    color: 'bg-purple-600',
+    progress: 35,
+    category: 'TYT',
+    topics: [
+      { id: 'tyt-chemistry-1', name: 'Kimya Bilimi', completed: true },
+      { id: 'tyt-chemistry-2', name: 'Atom ve Yapısı', completed: true },
+      { id: 'tyt-chemistry-3', name: 'Periyodik Sistem', completed: true },
+      { id: 'tyt-chemistry-4', name: 'Kimyasal Türler Arası Etkileşimler', completed: false },
+      { id: 'tyt-chemistry-5', name: 'Maddenin Halleri', completed: false },
+      { id: 'tyt-chemistry-6', name: 'Kimyanın Temel Kanunları', completed: false },
+      { id: 'tyt-chemistry-7', name: 'Asitler, Bazlar ve Tuzlar', completed: false },
+      { id: 'tyt-chemistry-8', name: 'Kimyasal Hesaplamalar', completed: false },
+      { id: 'tyt-chemistry-9', name: 'Karışımlar', completed: false },
+      { id: 'tyt-chemistry-10', name: 'Endüstride ve Canlılarda Enerji', completed: false },
+      { id: 'tyt-chemistry-11', name: 'Kimya Her Yerde', completed: false }
+    ]
+  },
+  {
+    id: 'tyt-biology',
+    name: 'Biyoloji',
+    icon: <Dna />,
+    color: 'bg-green-600',
+    progress: 40,
+    category: 'TYT',
+    topics: [
+      { id: 'tyt-biology-1', name: 'Canlıların Ortak Özellikleri', completed: true },
+      { id: 'tyt-biology-2', name: 'Canlıların Temel Bileşenleri', completed: true },
+      { id: 'tyt-biology-3', name: 'Hücre ve Organeller – Madde Geçişleri', completed: true },
+      { id: 'tyt-biology-4', name: 'Canlıların Sınıflandırılması', completed: false },
+      { id: 'tyt-biology-5', name: 'Hücrede Bölünme – Üreme', completed: false },
+      { id: 'tyt-biology-6', name: 'Kalıtım', completed: false },
+      { id: 'tyt-biology-7', name: 'Bitki Biyolojisi', completed: false },
+      { id: 'tyt-biology-8', name: 'Ekosistem', completed: false }
+    ]
+  },
+  {
+    id: 'ayt-math',
+    name: 'AYT Matematik',
+    icon: <Calculator />,
+    color: 'bg-indigo-500',
+    progress: 25,
+    category: 'AYT',
+    topics: [
+      { id: 'ayt-math-1', name: 'Temel Kavramlar', completed: true },
+      { id: 'ayt-math-2', name: 'Sayı Basamakları', completed: true },
+      { id: 'ayt-math-3', name: 'Bölme ve Bölünebilme', completed: true },
+      { id: 'ayt-math-4', name: 'EBOB - EKOK', completed: true },
+      { id: 'ayt-math-5', name: 'Rasyonel Sayılar', completed: true },
+      { id: 'ayt-math-6', name: 'Basit Eşitsizlikler', completed: true },
+      { id: 'ayt-math-7', name: 'Mutlak Değer', completed: true },
+      { id: 'ayt-math-8', name: 'Üslü Sayılar', completed: true },
+      { id: 'ayt-math-9', name: 'Köklü Sayılar', completed: false },
+      { id: 'ayt-math-10', name: 'Çarpanlara Ayırma', completed: false },
+      { id: 'ayt-math-11', name: 'Oran Orantı', completed: false },
+      { id: 'ayt-math-12', name: 'Denklem Çözme', completed: false },
+      { id: 'ayt-math-13', name: 'Problemler', completed: false },
+      { id: 'ayt-math-14', name: 'Kümeler', completed: false },
+      { id: 'ayt-math-15', name: 'Kartezyen Çarpım', completed: false },
+      { id: 'ayt-math-16', name: 'Mantık', completed: false },
+      { id: 'ayt-math-17', name: 'Fonksiyonlar', completed: false },
+      { id: 'ayt-math-18', name: 'Polinomlar', completed: false },
+      { id: 'ayt-math-19', name: '2.Dereceden Denklemler', completed: false },
+      { id: 'ayt-math-20', name: 'Permütasyon ve Kombinasyon', completed: false },
+      { id: 'ayt-math-21', name: 'Binom ve Olasılık', completed: false },
+      { id: 'ayt-math-22', name: 'İstatistik', completed: false },
+      { id: 'ayt-math-23', name: 'Karmaşık Sayılar', completed: false },
+      { id: 'ayt-math-24', name: '2.Dereceden Eşitsizlikler', completed: false },
+      { id: 'ayt-math-25', name: 'Parabol', completed: false },
+      { id: 'ayt-math-26', name: 'Trigonometri', completed: false },
+      { id: 'ayt-math-27', name: 'Logaritma', completed: false },
+      { id: 'ayt-math-28', name: 'Diziler', completed: false },
+      { id: 'ayt-math-29', name: 'Limit', completed: false },
+      { id: 'ayt-math-30', name: 'Türev', completed: false },
+      { id: 'ayt-math-31', name: 'İntegral', completed: false }
+    ]
+  },
+  {
+    id: 'physics',
+    name: 'Fizik',
+    icon: <Atom />,
+    color: 'bg-cyan-500',
+    progress: 30,
+    category: 'AYT',
+    topics: [
+      { id: 'physics-1', name: 'Vektörler', completed: true },
+      { id: 'physics-2', name: 'Kuvvet, Tork ve Denge', completed: true },
+      { id: 'physics-3', name: 'Kütle Merkezi', completed: true },
+      { id: 'physics-4', name: 'Basit Makineler', completed: true },
+      { id: 'physics-5', name: 'Hareket', completed: true },
+      { id: 'physics-6', name: 'Newton\'un Hareket Yasaları', completed: true },
+      { id: 'physics-7', name: 'İş, Güç ve Enerji II', completed: true },
+      { id: 'physics-8', name: 'Atışlar', completed: true },
+      { id: 'physics-9', name: 'İtme ve Momentum', completed: false },
+      { id: 'physics-10', name: 'Elektrik Alan ve Potansiyel', completed: false },
+      { id: 'physics-11', name: 'Paralel Levhalar ve Sığa', completed: false },
+      { id: 'physics-12', name: 'Manyetik Alan ve Manyetik Kuvvet', completed: false },
+      { id: 'physics-13', name: 'İndüksiyon, Alternatif Akım ve Transformatörler', completed: false },
+      { id: 'physics-14', name: 'Çembersel Hareket', completed: false },
+      { id: 'physics-15', name: 'Dönme, Yuvarlanma ve Açısal Momentum', completed: false },
+      { id: 'physics-16', name: 'Kütle Çekim ve Kepler Yasaları', completed: false },
+      { id: 'physics-17', name: 'Basit Harmonik Hareket', completed: false },
+      { id: 'physics-18', name: 'Dalga Mekaniği ve Elektromanyetik Dalgalar', completed: false },
+      { id: 'physics-19', name: 'Atom Modelleri', completed: false },
+      { id: 'physics-20', name: 'Büyük Patlama ve Parçacık Fiziği', completed: false },
+      { id: 'physics-21', name: 'Radyoaktivite', completed: false },
+      { id: 'physics-22', name: 'Özel Görelilik', completed: false },
+      { id: 'physics-23', name: 'Kara Cisim Işıması', completed: false },
+      { id: 'physics-24', name: 'Fotoelektrik Olay ve Compton Olayı', completed: false },
+      { id: 'physics-25', name: 'Modern Fiziğin Teknolojideki Uygulamaları', completed: false }
+    ]
+  },
+  {
+    id: 'chemistry',
+    name: 'Kimya',
+    icon: <Beaker />,
+    color: 'bg-orange-500',
+    progress: 35,
+    category: 'AYT',
+    topics: [
+      { id: 'chemistry-1', name: 'Kimya Bilimi', completed: true },
+      { id: 'chemistry-2', name: 'Atom ve Periyodik Sistem', completed: true },
+      { id: 'chemistry-3', name: 'Kimyasal Türler Arası Etkileşimler', completed: true },
+      { id: 'chemistry-4', name: 'Kimyasal Hesaplamalar', completed: true },
+      { id: 'chemistry-5', name: 'Kimyanın Temel Kanunları', completed: true },
+      { id: 'chemistry-6', name: 'Asit, Baz ve Tuz', completed: true },
+      { id: 'chemistry-7', name: 'Maddenin Halleri', completed: true },
+      { id: 'chemistry-8', name: 'Karışımlar', completed: true },
+      { id: 'chemistry-9', name: 'Doğa ve Kimya', completed: false },
+      { id: 'chemistry-10', name: 'Kimya Her Yerde', completed: false },
+      { id: 'chemistry-11', name: 'Modern Atom Teorisi', completed: false },
+      { id: 'chemistry-12', name: 'Gazlar', completed: false },
+      { id: 'chemistry-13', name: 'Sıvı Çözeltiler', completed: false },
+      { id: 'chemistry-14', name: 'Kimyasal Tepkimelerde Enerji', completed: false },
+      { id: 'chemistry-15', name: 'Kimyasal Tepkimelerde Hız', completed: false },
+      { id: 'chemistry-16', name: 'Kimyasal Tepkimelerde Denge', completed: false },
+      { id: 'chemistry-17', name: 'Asit-Baz Dengesi', completed: false },
+      { id: 'chemistry-18', name: 'Çözünürlük Dengesi', completed: false },
+      { id: 'chemistry-19', name: 'Kimya ve Elektrik', completed: false },
+      { id: 'chemistry-20', name: 'Organik Kimyaya Giriş', completed: false },
+      { id: 'chemistry-21', name: 'Organik Kimya', completed: false },
+      { id: 'chemistry-22', name: 'Enerji Kaynakları ve Bilimsel Gelişmeler', completed: false }
+    ]
+  },
+  {
+    id: 'biology',
+    name: 'Biyoloji',
+    icon: <Dna />,
+    color: 'bg-emerald-500',
+    progress: 35,
+    category: 'AYT',
+    topics: [
+      { id: 'biology-1', name: 'Sinir Sistemi', completed: true },
+      { id: 'biology-2', name: 'Endokrin Sistem ve Hormonlar', completed: true },
+      { id: 'biology-3', name: 'Duyu Organları', completed: true },
+      { id: 'biology-4', name: 'Destek ve Hareket Sistemi', completed: true },
+      { id: 'biology-5', name: 'Sindirim Sistemi', completed: true },
+      { id: 'biology-6', name: 'Dolaşım ve Bağışıklık Sistemi', completed: true },
+      { id: 'biology-7', name: 'Solunum Sistemi', completed: true },
+      { id: 'biology-8', name: 'Üriner Sistem (Boşaltım Sistemi)', completed: false },
+      { id: 'biology-9', name: 'Üreme Sistemi ve Embriyonik Gelişim', completed: false },
+      { id: 'biology-10', name: 'Komünite Ekolojisi', completed: false },
+      { id: 'biology-11', name: 'Popülasyon Ekolojisi', completed: false },
+      { id: 'biology-12', name: 'Nükleik Asitler', completed: false },
+      { id: 'biology-13', name: 'Genetik Şifre ve Protein Sentezi', completed: false },
+      { id: 'biology-14', name: 'Canlılık ve Enerji', completed: false },
+      { id: 'biology-15', name: 'Fotosentez', completed: false },
+      { id: 'biology-16', name: 'Kemosentez', completed: false },
+      { id: 'biology-17', name: 'Hücresel Solunum', completed: false },
+      { id: 'biology-18', name: 'Bitki Biyolojisi', completed: false },
+      { id: 'biology-19', name: 'Canlılar ve Çevre', completed: false }
+    ]
+  }
+];
+
 const SubjectAnalysis: React.FC = () => {
+  const [subjects, setSubjects] = useState<Subject[]>(getInitialSubjects());
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  
-  // Load subjects from localStorage or use default data
-  const getInitialSubjects = (): Subject[] => {
-    const saved = localStorage.getItem('subjects');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (error) {
-        console.error('Error parsing saved subjects:', error);
-      }
-    }
-    return [
-    {
-      id: '1',
-      name: 'Matematik',
-      color: 'bg-blue-500',
-      icon: '📐',
-      progress: 75,
-      topics: [
-        { id: '1', name: 'Mutlak Değer', completed: false },
-        { id: '2', name: 'Ardışık Sayılar', completed: false },
-        { id: '3', name: 'Tek – Çift Sayılar', completed: false },
-        { id: '4', name: 'Asal Sayılar', completed: false },
-        { id: '5', name: 'Bölünebilme Kuralları', completed: false },
-        { id: '6', name: 'OBEB – OKEK', completed: false },
-        { id: '7', name: 'Faktöriyel', completed: false },
-        { id: '8', name: 'Basamak Kavramı', completed: false },
-        { id: '9', name: 'Sayı Basamakları ve Sayı Sistemleri', completed: false },
-        { id: '10', name: 'Bölme ve Bölünebilme', completed: false },
-        { id: '11', name: 'OBEB – OKEK', completed: false },
-        { id: '12', name: 'Rasyonel Sayılar', completed: false },
-        { id: '13', name: 'Ondalık Sayılar', completed: false },
-        { id: '14', name: 'Üslü Sayılar', completed: false },
-        { id: '15', name: 'Köklü Sayılar', completed: false },
-        { id: '16', name: 'Çarpanlara Ayırma', completed: false },
-        { id: '17', name: 'Denklem Çözme', completed: false },
-        { id: '18', name: 'Eşitsizlikler', completed: false },
-        { id: '19', name: 'Sayı Problemleri', completed: false },
-        { id: '20', name: 'Yaş Problemleri', completed: false },
-        { id: '21', name: 'İşçi – Havuz Problemleri', completed: false },
-        { id: '22', name: 'Hareket Problemleri', completed: false },
-        { id: '23', name: 'Karışım Problemleri', completed: false },
-        { id: '24', name: 'Yüzde – Kar – Zarar – Faiz Problemleri', completed: false },
-        { id: '25', name: 'Denklem Kurma Problemleri', completed: false },
-        { id: '26', name: 'Fonksiyonlar', completed: false },
-        { id: '27', name: 'Polinomlar', completed: false },
-        { id: '28', name: 'İkinci Dereceden Denklemler', completed: false },
-        { id: '29', name: 'Karmaşık Sayılar', completed: false },
-        { id: '30', name: 'Mantık', completed: false },
-        { id: '31', name: 'Kümeler', completed: false },
-        { id: '32', name: 'Kartezyen Çarpım – İlişkiler', completed: false },
-        { id: '33', name: 'Modüler Aritmetik', completed: false },
-        { id: '34', name: 'Permütasyon – Kombinasyon – Binom – Olasılık', completed: false },
-        { id: '35', name: 'İstatistik', completed: false },
-        { id: '36', name: 'Sayma ve Sıralama', completed: false }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Türkçe',
-      color: 'bg-red-500',
-      icon: '📚',
-      progress: 60,
-      topics: [
-        { id: '1', name: 'Ses Bilgisi', completed: true },
-        { id: '2', name: 'Kelime Bilgisi', completed: true },
-        { id: '3', name: 'Cümle Bilgisi', completed: true },
-        { id: '4', name: 'Paragraf', completed: false },
-        { id: '5', name: 'Metin Türleri', completed: false },
-        { id: '6', name: 'Yazım Kuralları', completed: false },
-        { id: '7', name: 'Noktalama İşaretleri', completed: false },
-        { id: '8', name: 'Anlatım Bozuklukları', completed: false }
-      ]
-    },
-    {
-      id: '3',
-      name: 'Fen Bilimleri',
-      color: 'bg-green-500',
-      icon: '🔬',
-      progress: 45,
-      topics: [
-        { id: '1', name: 'Madde ve Değişim', completed: true },
-        { id: '2', name: 'Kuvvet ve Hareket', completed: true },
-        { id: '3', name: 'Enerji', completed: false },
-        { id: '4', name: 'Işık ve Ses', completed: false },
-        { id: '5', name: 'Elektrik', completed: false },
-        { id: '6', name: 'Canlılar ve Yaşam', completed: false },
-        { id: '7', name: 'İnsan ve Çevre', completed: false },
-        { id: '8', name: 'Dünya ve Evren', completed: false }
-      ]
-    },
-    {
-      id: '4',
-      name: 'Sosyal Bilgiler',
-      color: 'bg-purple-500',
-      icon: '🌍',
-      progress: 80,
-      topics: [
-        { id: '1', name: 'Tarih', completed: true },
-        { id: '2', name: 'Coğrafya', completed: true },
-        { id: '3', name: 'Vatandaşlık', completed: true },
-        { id: '4', name: 'Ekonomi', completed: true },
-        { id: '5', name: 'Kültür', completed: false },
-        { id: '6', name: 'Toplum', completed: false }
-      ]
-    },
-    {
-      id: '5',
-      name: 'İngilizce',
-      color: 'bg-yellow-500',
-      icon: '🇬🇧',
-      progress: 55,
-      topics: [
-        { id: '1', name: 'Grammar Basics', completed: true },
-        { id: '2', name: 'Vocabulary', completed: true },
-        { id: '3', name: 'Reading Comprehension', completed: true },
-        { id: '4', name: 'Writing Skills', completed: false },
-        { id: '5', name: 'Speaking Practice', completed: false },
-        { id: '6', name: 'Listening Skills', completed: false },
-        { id: '7', name: 'Tenses', completed: false },
-        { id: '8', name: 'Phrasal Verbs', completed: false }
-      ]
-    }
-  ];
-};
+  const [tytExpanded, setTytExpanded] = useState(true);
+  const [aytExpanded, setAytExpanded] = useState(true);
 
-  const [subjects, setSubjects] = useState<Subject[]>(getInitialSubjects);
-
-  // Save subjects to localStorage whenever subjects change
   useEffect(() => {
-    localStorage.setItem('subjects', JSON.stringify(subjects));
+    const savedSubjects = localStorage.getItem('subjects');
+    if (savedSubjects) {
+      const parsedSubjects = JSON.parse(savedSubjects);
+      // Merge saved data with initial subjects to restore icons
+      const initialSubjects = getInitialSubjects();
+      const mergedSubjects = parsedSubjects.map((saved: any) => {
+        const initial = initialSubjects.find(s => s.id === saved.id);
+        return {
+          ...initial,
+          ...saved,
+          icon: initial?.icon // Restore the icon from initial data
+        };
+      });
+      setSubjects(mergedSubjects);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save subjects without icons to avoid circular reference
+    const subjectsToSave = subjects.map(({ icon, ...subject }) => subject);
+    localStorage.setItem('subjects', JSON.stringify(subjectsToSave));
   }, [subjects]);
 
-  const toggleTopic = (topicId: string) => {
-    if (!selectedSubject) return;
-    
-    const updatedTopics = selectedSubject.topics.map(topic =>
-      topic.id === topicId ? { ...topic, completed: !topic.completed } : topic
-    );
-    
-    const completedCount = updatedTopics.filter(topic => topic.completed).length;
-    const progress = Math.round((completedCount / updatedTopics.length) * 100);
-    
-    const updatedSelectedSubject = {
-      ...selectedSubject,
-      topics: updatedTopics,
-      progress
-    };
-    
-    // Update both selectedSubject and subjects array
-    setSelectedSubject(updatedSelectedSubject);
+  const toggleTopic = (subjectId: string, topicId: string) => {
     setSubjects(prevSubjects => 
-      prevSubjects.map(subject => 
-        subject.id === selectedSubject.id ? updatedSelectedSubject : subject
-      )
+      prevSubjects.map(subject => {
+        if (subject.id === subjectId) {
+          const updatedTopics = subject.topics.map(topic => 
+            topic.id === topicId ? { ...topic, completed: !topic.completed } : topic
+          );
+          const completedCount = updatedTopics.filter(topic => topic.completed).length;
+          const progress = Math.round((completedCount / updatedTopics.length) * 100);
+          
+          const updatedSubject = { ...subject, topics: updatedTopics, progress };
+          
+          if (selectedSubject && selectedSubject.id === subjectId) {
+            setSelectedSubject(updatedSubject);
+          }
+          
+          return updatedSubject;
+        }
+        return subject;
+      })
     );
   };
 
@@ -182,282 +468,290 @@ const SubjectAnalysis: React.FC = () => {
     const completedTopics = subjects.reduce((sum, subject) => 
       sum + subject.topics.filter(topic => topic.completed).length, 0
     );
-    return Math.round((completedTopics / totalTopics) * 100);
+    return totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
   };
 
   if (selectedSubject) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-6">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
+
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border border-white/50"
+            className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/50"
           >
-            <button
-              onClick={() => setSelectedSubject(null)}
-              className="flex items-center text-gray-600 hover:text-purple-600 mb-6 transition-all duration-300 group"
-            >
-              <div className="bg-gray-100 group-hover:bg-purple-100 rounded-full p-2 mr-3 transition-colors">
-                <ChevronRight className="h-5 w-5 rotate-180" />
-              </div>
-              <span className="font-medium">Geri Dön</span>
-            </button>
-            
-            <div className="flex items-center mb-6">
-              <div className={`w-20 h-20 ${selectedSubject.color} rounded-3xl flex items-center justify-center text-3xl mr-6 shadow-lg`}>
+            <div className="flex items-center mb-8">
+              <div className={`w-16 h-16 ${selectedSubject.color} rounded-3xl flex items-center justify-center text-3xl mr-6 shadow-lg`}>
                 {selectedSubject.icon}
               </div>
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">{selectedSubject.name}</h1>
-                <p className="text-gray-600 text-lg font-medium">Konu İlerleme Takibi</p>
-              </div>
-              {selectedSubject.progress >= 80 && (
-                <div className="bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl p-3">
-                  <Trophy className="h-8 w-8 text-white" />
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{selectedSubject.name}</h1>
+                <div className="flex items-center">
+                  <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mr-4">
+                    {selectedSubject.progress}% Tamamlandı
+                  </div>
+                  {selectedSubject.progress >= 80 && <Star className="h-6 w-6 text-yellow-500" />}
                 </div>
-              )}
+              </div>
             </div>
             
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-lg font-semibold text-gray-700">İlerleme Durumu</span>
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{selectedSubject.progress}%</span>
-              </div>
+            <div className="mb-8">
               <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${selectedSubject.progress}%` }}
-                  transition={{ duration: 1.5 }}
+                  transition={{ duration: 1 }}
                   className={`h-4 rounded-full bg-gradient-to-r ${selectedSubject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
                 ></motion.div>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 text-center">
-                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-emerald-600 mb-1">
-                  {selectedSubject.topics.filter(t => t.completed).length}
-                </div>
-                <div className="text-sm text-emerald-700 font-medium">Tamamlanan Konu</div>
-              </div>
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 text-center">
-                <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Circle className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-3xl font-bold text-orange-600 mb-1">
-                  {selectedSubject.topics.filter(t => !t.completed).length}
-                </div>
-                <div className="text-sm text-orange-700 font-medium">Kalan Konu</div>
-              </div>
+            <div className="grid gap-4">
+              {selectedSubject.topics.map((topic, index) => (
+                <motion.div
+                  key={topic.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  onClick={() => toggleTopic(selectedSubject.id, topic.id)}
+                  className={`p-4 rounded-2xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                    topic.completed 
+                      ? 'bg-gradient-to-r from-emerald-100 to-emerald-200 border-2 border-emerald-300 shadow-lg' 
+                      : 'bg-gradient-to-r from-gray-100 to-gray-200 border-2 border-gray-300 hover:from-purple-100 hover:to-purple-200 hover:border-purple-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`font-semibold ${
+                      topic.completed ? 'text-emerald-800' : 'text-gray-700'
+                    }`}>
+                      {topic.name}
+                    </span>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                      topic.completed 
+                        ? 'bg-emerald-500 border-emerald-500 text-white' 
+                        : 'border-gray-400 hover:border-purple-500'
+                    }`}>
+                      {topic.completed && '✓'}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
-          
-          {/* Topics List */}
-          <div className="space-y-4">
-            {selectedSubject.topics.map((topic, index) => (
-              <motion.div
-                key={topic.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                onClick={() => toggleTopic(topic.id)}
-                className={`group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-2 transition-all duration-300 cursor-pointer hover:shadow-xl transform hover:scale-[1.02] ${
-                  topic.completed 
-                    ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50' 
-                    : 'border-gray-200 hover:border-purple-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mr-4 transition-all duration-300 ${
-                      topic.completed 
-                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg' 
-                        : 'bg-gray-200 group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400'
-                    }`}>
-                      {topic.completed ? (
-                        <CheckCircle className="h-6 w-6 text-white" />
-                      ) : (
-                        <Circle className="h-6 w-6 text-gray-500 group-hover:text-white transition-colors" />
-                      )}
-                    </div>
-                    <div>
-                      <span className={`text-lg font-semibold transition-colors ${
-                        topic.completed ? 'text-emerald-800' : 'text-gray-900 group-hover:text-purple-700'
-                      }`}>
-                        {topic.name}
-                      </span>
-                      <p className={`text-sm mt-1 ${
-                        topic.completed ? 'text-emerald-600' : 'text-gray-500'
-                      }`}>
-                        {topic.completed ? 'Başarıyla tamamlandı' : 'Henüz tamamlanmadı'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    {topic.completed && (
-                      <motion.div 
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center"
-                      >
-                        <Star className="h-4 w-4 mr-1" />
-                        Tamamlandı
-                      </motion.div>
-                    )}
-                    <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      topic.completed 
-                        ? 'bg-emerald-500 shadow-lg' 
-                        : 'bg-gray-300 group-hover:bg-purple-400'
-                    }`}></div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-6">
+      <div className="max-w-7xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl mb-6 shadow-lg">
-            <Brain className="h-10 w-10 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">Konu Analizi</h1>
-          <p className="text-gray-600 text-lg">Hangi konularda ne kadar ilerlediğinizi takip edin ve hedeflerinize ulaşın</p>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+            Konu Analizi
+          </h1>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            İlerlemenizi takip edin ve başarıya ulaşın
+          </p>
         </motion.div>
         
-        {/* Overall Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-md text-center text-white transform hover:scale-105 transition-all duration-300"
-          >
-            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Target className="h-4 w-4 text-white" />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
+        >
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-md border border-white/50">
+            <div className="text-xl font-bold text-purple-600 mb-1">{getOverallProgress()}%</div>
+            <div className="text-gray-600 text-sm font-medium">Genel İlerleme</div>
+          </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-md border border-white/50">
+            <div className="text-xl font-bold text-blue-600 mb-1">{subjects.length}</div>
+            <div className="text-gray-600 text-sm font-medium">Toplam Ders</div>
+          </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-md border border-white/50">
+            <div className="text-xl font-bold text-emerald-600 mb-1">
+              {subjects.reduce((sum, subject) => sum + subject.topics.filter(topic => topic.completed).length, 0)}
             </div>
-            <div className="text-xl font-bold mb-1">{getOverallProgress()}%</div>
-            <div className="text-blue-100 text-xs font-medium">Genel İlerleme</div>
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-3 shadow-md text-center text-white transform hover:scale-105 transition-all duration-300"
-          >
-            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mx-auto mb-2">
-              <BookOpen className="h-4 w-4 text-white" />
+            <div className="text-gray-600 text-sm font-medium">Tamamlanan Konu</div>
+          </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 shadow-md border border-white/50">
+            <div className="text-xl font-bold text-yellow-600 mb-1">
+              {subjects.filter(subject => subject.progress >= 80).length}
             </div>
-            <div className="text-xl font-bold mb-1">{subjects.length}</div>
-            <div className="text-emerald-100 text-xs font-medium">Toplam Ders</div>
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3 shadow-md text-center text-white transform hover:scale-105 transition-all duration-300"
-          >
-            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Zap className="h-4 w-4 text-white" />
-            </div>
-            <div className="text-xl font-bold mb-1">
-              {subjects.reduce((sum, subject) => sum + subject.topics.filter(t => t.completed).length, 0)}
-            </div>
-            <div className="text-purple-100 text-xs font-medium">Tamamlanan Konu</div>
-          </motion.div>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl p-3 shadow-md text-center text-white transform hover:scale-105 transition-all duration-300"
-          >
-            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Trophy className="h-4 w-4 text-white" />
-            </div>
-            <div className="text-xl font-bold mb-1">
-              {subjects.filter(s => s.progress >= 80).length}
-            </div>
-            <div className="text-amber-100 text-xs font-medium">Başarılı Ders</div>
-          </motion.div>
-        </div>
+            <div className="text-gray-600 text-sm font-medium">Başarılı Ders</div>
+          </div>
+        </motion.div>
         
-        {/* Subjects Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {subjects.map((subject, index) => (
-            <motion.div
-              key={subject.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              onClick={() => setSelectedSubject(subject)}
-              className="group bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-white/50 hover:bg-white/90"
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <button 
+            onClick={() => setTytExpanded(!tytExpanded)}
+            className="flex items-center mb-6 w-full group hover:bg-white/50 rounded-2xl p-4 transition-all duration-300"
+          >
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform">
+              <BookOpen className="h-6 w-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent flex-1 text-left">TYT Dersleri</h2>
+            <div className={`transform transition-transform duration-300 ${tytExpanded ? 'rotate-180' : ''}`}>
+              <ChevronDown className="h-6 w-6 text-blue-600" />
+            </div>
+          </button>
+          {tytExpanded && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8"
             >
-              <div className="flex items-center mb-4">
-                <div className={`w-12 h-12 ${subject.color} rounded-2xl flex items-center justify-center text-2xl mr-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                  {subject.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors truncate">{subject.name}</h3>
-                  <p className="text-xs text-gray-500 font-medium">{subject.topics.length} konu</p>
-                </div>
-              </div>
-              
-              {/* Progress */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-gray-700">İlerleme</span>
-                  <div className="flex items-center">
-                    {subject.progress >= 80 && <Star className="h-3 w-3 text-yellow-500 mr-1" />}
-                    <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{subject.progress}%</span>
+              {subjects.filter(subject => subject.category === 'TYT').map((subject, index) => (
+                <motion.div
+                  key={subject.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  onClick={() => setSelectedSubject(subject)}
+                  className="group bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-white/50 hover:bg-white/90"
+                >
+                  <div className="flex items-center mb-4">
+                    <div className={`w-12 h-12 ${subject.color} rounded-2xl flex items-center justify-center text-2xl mr-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                      {subject.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors truncate">{subject.name}</h3>
+                      <p className="text-xs text-gray-500 font-medium">{subject.topics.length} konu</p>
+                    </div>
                   </div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${subject.progress}%` }}
-                    transition={{ duration: 1, delay: 0.2 * index }}
-                    className={`h-2 rounded-full bg-gradient-to-r ${subject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
-                  ></motion.div>
-                </div>
-              </div>
-              
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-2 text-center">
-                  <div className="text-lg font-bold text-emerald-600 mb-0">
-                    {subject.topics.filter(t => t.completed).length}
+                  
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-semibold text-gray-700">İlerleme</span>
+                      <div className="flex items-center">
+                        {subject.progress >= 80 && <Star className="h-3 w-3 text-yellow-500 mr-1" />}
+                        <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{subject.progress}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${subject.progress}%` }}
+                        transition={{ duration: 1, delay: 0.2 * index }}
+                        className={`h-2 rounded-full bg-gradient-to-r ${subject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
+                      ></motion.div>
+                    </div>
                   </div>
-                  <div className="text-xs text-emerald-700 font-medium">Tamam</div>
-                </div>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-2 text-center">
-                  <div className="text-lg font-bold text-orange-600 mb-0">
-                    {subject.topics.filter(t => !t.completed).length}
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-2 text-center">
+                      <div className="text-lg font-bold text-emerald-600 mb-0">
+                        {subject.topics.filter(t => t.completed).length}
+                      </div>
+                      <div className="text-xs text-emerald-700 font-medium">Tamam</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-2 text-center">
+                      <div className="text-lg font-bold text-orange-600 mb-0">
+                        {subject.topics.filter(t => !t.completed).length}
+                      </div>
+                      <div className="text-xs text-orange-700 font-medium">Kalan</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-orange-700 font-medium">Kalan</div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
-        </div>
+          )}
+        </motion.div>
+ 
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <button 
+            onClick={() => setAytExpanded(!aytExpanded)}
+            className="flex items-center mb-6 w-full group hover:bg-white/50 rounded-2xl p-4 transition-all duration-300"
+          >
+            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent flex-1 text-left">AYT Dersleri</h2>
+            <div className={`transform transition-transform duration-300 ${aytExpanded ? 'rotate-180' : ''}`}>
+              <ChevronDown className="h-6 w-6 text-purple-600" />
+            </div>
+          </button>
+          {aytExpanded && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            >
+              {subjects.filter(subject => subject.category === 'AYT').map((subject, index) => (
+                <motion.div
+                  key={subject.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  onClick={() => setSelectedSubject(subject)}
+                  className="group bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-white/50 hover:bg-white/90"
+                >
+                  <div className="flex items-center mb-4">
+                    <div className={`w-12 h-12 ${subject.color} rounded-2xl flex items-center justify-center text-2xl mr-3 shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                      {subject.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-purple-600 transition-colors truncate">{subject.name}</h3>
+                      <p className="text-xs text-gray-500 font-medium">{subject.topics.length} konu</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-semibold text-gray-700">İlerleme</span>
+                      <div className="flex items-center">
+                        {subject.progress >= 80 && <Star className="h-3 w-3 text-yellow-500 mr-1" />}
+                        <span className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{subject.progress}%</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${subject.progress}%` }}
+                        transition={{ duration: 1, delay: 0.2 * index }}
+                        className={`h-2 rounded-full bg-gradient-to-r ${subject.color.replace('bg-', 'from-')} to-purple-500 shadow-sm`}
+                      ></motion.div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-2 text-center">
+                      <div className="text-lg font-bold text-emerald-600 mb-0">
+                        {subject.topics.filter(t => t.completed).length}
+                      </div>
+                      <div className="text-xs text-emerald-700 font-medium">Tamam</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-2 text-center">
+                      <div className="text-lg font-bold text-orange-600 mb-0">
+                        {subject.topics.filter(t => !t.completed).length}
+                      </div>
+                      <div className="text-xs text-orange-700 font-medium">Kalan</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </motion.div>
       </div>
     </div>
   );

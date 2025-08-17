@@ -116,12 +116,7 @@ const QuestionStats: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/student')}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
-            >
-              <ArrowLeft size={24} className="text-gray-700" />
-            </button>
+
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Soru İstatistiklerim</h1>
               <p className="text-gray-600 mt-1">Çözdüğün soruları takip et ve performansını analiz et</p>
