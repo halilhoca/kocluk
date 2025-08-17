@@ -475,7 +475,15 @@ const SubjectAnalysis: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 p-6">
         <div className="max-w-4xl mx-auto">
-
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={() => setSelectedSubject(null)}
+            className="mb-6 flex items-center px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 hover:bg-white/90 hover:shadow-xl transition-all duration-300 text-gray-700 hover:text-gray-900 group"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span className="font-medium">Konu Analizine Dön</span>
+          </motion.button>
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
