@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Calculator, Globe, Beaker, Atom, Dna, TrendingUp, Star, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { getStudentSubjectAnalysis, upsertSubjectAnalysis, updateTopicCompletion } from '../../lib/supabase';
+import { getStudentSubjectAnalysis, bulkUpsertSubjectAnalysis, updateTopicCompletion } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 
 interface Topic {
@@ -520,14 +520,14 @@ const SubjectAnalysis: React.FC = () => {
 
       try {
         const subjectsToSave = subjects.map(subject => ({
-          student_id: user.id,
-          subject_name: subject.name,
-          subject_category: subject.category,
-          progress: subject.progress,
-          completed_topics: subject.topics.filter(topic => topic.completed).map(topic => topic.name)
+          subjectId: subject.id,
+          subjectName: subject.name,
+          subjectCategory: subject.category,
+          completedTopics: subject.topics.filter(topic => topic.completed).map(topic => topic.name),
+          progress: subject.progress
         }));
 
-        const { error } = await upsertSubjectAnalysis(subjectsToSave);
+        const { error } = await bulkUpsertSubjectAnalysis(user.id, subjectsToSave);
         
         if (error) {
           console.error('Error saving subjects:', error);
@@ -582,8 +582,7 @@ const SubjectAnalysis: React.FC = () => {
     try {
       const { error } = await updateTopicCompletion(
         user.id,
-        subject.name,
-        subject.category,
+        subject.id,
         topic.name,
         !topic.completed
       );
