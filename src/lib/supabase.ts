@@ -38,6 +38,211 @@ export async function signIn(email: string, password: string) {
   return { data, error };
 }
 
+// Subject Analysis Functions
+export interface StudentSubjectAnalysis {
+  id: string;
+  student_id: string;
+  subject_id: string;
+  subject_name: string;
+  subject_category: 'TYT' | 'AYT';
+  progress: number;
+  completed_topics: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+// Get all subject analysis for a student
+export async function getStudentSubjectAnalysis(studentId: string) {
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('subject_category', { ascending: true })
+    .order('subject_name', { ascending: true });
+  
+  return { data, error };
+}
+
+// Get specific subject analysis
+export async function getSubjectAnalysis(studentId: string, subjectId: string) {
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .select('*')
+    .eq('student_id', studentId)
+    .eq('subject_id', subjectId)
+    .single();
+  
+  return { data, error };
+}
+
+// Create or update subject analysis
+export async function upsertSubjectAnalysis(
+  studentId: string,
+  subjectId: string,
+  subjectName: string,
+  subjectCategory: 'TYT' | 'AYT',
+  completedTopics: string[],
+  progress: number
+) {
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .upsert({
+      student_id: studentId,
+      subject_id: subjectId,
+      subject_name: subjectName,
+      subject_category: subjectCategory,
+      completed_topics: completedTopics,
+      progress: progress
+    }, {
+      onConflict: 'student_id,subject_id'
+    })
+    .select()
+    .single();
+  
+  return { data, error };
+}
+
+// Update topic completion status
+export async function updateTopicCompletion(
+  studentId: string,
+  subjectId: string,
+  topicId: string,
+  isCompleted: boolean
+) {
+  // First get current data
+  const { data: currentData, error: fetchError } = await getSubjectAnalysis(studentId, subjectId);
+  
+  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows returned
+    return { data: null, error: fetchError };
+  }
+  
+  let completedTopics: string[] = currentData?.completed_topics || [];
+  
+  if (isCompleted) {
+    // Add topic if not already completed
+    if (!completedTopics.includes(topicId)) {
+      completedTopics.push(topicId);
+    }
+  } else {
+    // Remove topic from completed list
+    completedTopics = completedTopics.filter(id => id !== topicId);
+  }
+  
+  // Calculate progress (this should match the total topics count from frontend)
+  // For now, we'll use a simple calculation, but this could be enhanced
+  const progress = Math.round((completedTopics.length / 35) * 100); // Assuming max 35 topics per subject
+  
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .upsert({
+      student_id: studentId,
+      subject_id: subjectId,
+      subject_name: currentData?.subject_name || subjectId,
+      subject_category: currentData?.subject_category || 'TYT',
+      completed_topics: completedTopics,
+      progress: progress
+    }, {
+      onConflict: 'student_id,subject_id'
+    })
+    .select()
+    .single();
+  
+  return { data, error };
+}
+
+// Bulk update subject analysis (for migrating from localStorage)
+export async function bulkUpsertSubjectAnalysis(
+  studentId: string,
+  subjects: Array<{
+    subjectId: string;
+    subjectName: string;
+    subjectCategory: 'TYT' | 'AYT';
+    completedTopics: string[];
+    progress: number;
+  }>
+) {
+  const dataToInsert = subjects.map(subject => ({
+    student_id: studentId,
+    subject_id: subject.subjectId,
+    subject_name: subject.subjectName,
+    subject_category: subject.subjectCategory,
+    completed_topics: subject.completedTopics,
+    progress: subject.progress
+  }));
+  
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .upsert(dataToInsert, {
+      onConflict: 'student_id,subject_id'
+    })
+    .select();
+  
+  return { data, error };
+}
+
+// Delete subject analysis
+export async function deleteSubjectAnalysis(studentId: string, subjectId: string) {
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .delete()
+    .eq('student_id', studentId)
+    .eq('subject_id', subjectId)
+    .select()
+    .single();
+  
+  return { data, error };
+}
+
+// Get subject analysis statistics
+export async function getSubjectAnalysisStats(studentId: string) {
+  const { data, error } = await supabase
+    .from('student_subject_analysis')
+    .select('subject_category, progress, completed_topics')
+    .eq('student_id', studentId);
+  
+  if (error) {
+    return { data: null, error };
+  }
+  
+  const stats = {
+    tyt: {
+      totalSubjects: 0,
+      completedSubjects: 0,
+      averageProgress: 0,
+      totalTopics: 0,
+      completedTopics: 0
+    },
+    ayt: {
+      totalSubjects: 0,
+      completedSubjects: 0,
+      averageProgress: 0,
+      totalTopics: 0,
+      completedTopics: 0
+    }
+  };
+  
+  data?.forEach(subject => {
+    const category = subject.subject_category.toLowerCase() as 'tyt' | 'ayt';
+    stats[category].totalSubjects++;
+    stats[category].averageProgress += subject.progress;
+    stats[category].totalTopics += subject.completed_topics?.length || 0;
+    
+    if (subject.progress === 100) {
+      stats[category].completedSubjects++;
+    }
+  });
+  
+  // Calculate averages
+  if (stats.tyt.totalSubjects > 0) {
+    stats.tyt.averageProgress = Math.round(stats.tyt.averageProgress / stats.tyt.totalSubjects);
+  }
+  if (stats.ayt.totalSubjects > 0) {
+    stats.ayt.averageProgress = Math.round(stats.ayt.averageProgress / stats.ayt.totalSubjects);
+  }
+  
+  return { data: stats, error: null };
+}
+
 export async function signUp(email: string, password: string) {
   const { data, error } = await supabase.auth.signUp({
     email,

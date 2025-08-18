@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BookOpen, Calculator, Globe, Beaker, Atom, Dna, TrendingUp, Star, ChevronDown, ArrowLeft } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+import { getStudentSubjectAnalysis, upsertSubjectAnalysis, updateTopicCompletion } from '../../lib/supabase';
+import toast from 'react-hot-toast';
 
 interface Topic {
   id: string;
@@ -24,16 +27,16 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Matematik',
     icon: <Calculator />,
     color: 'bg-blue-500',
-    progress: 20,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'math-1', name: 'Temel Kavramlar', completed: true },
-      { id: 'math-2', name: 'Tek Çift Sayılar', completed: true },
-      { id: 'math-3', name: 'Ardışık Sayılar', completed: true },
-      { id: 'math-4', name: 'Asal Sayılar', completed: true },
-      { id: 'math-5', name: 'Faktöriyel Kavramı', completed: true },
-      { id: 'math-6', name: 'Sayı Basamakları', completed: true },
-      { id: 'math-7', name: 'Bölme Bölünebilme', completed: true },
+      { id: 'math-1', name: 'Temel Kavramlar', completed: false },
+      { id: 'math-2', name: 'Tek Çift Sayılar', completed: false },
+      { id: 'math-3', name: 'Ardışık Sayılar', completed: false },
+      { id: 'math-4', name: 'Asal Sayılar', completed: false },
+      { id: 'math-5', name: 'Faktöriyel Kavramı', completed: false },
+      { id: 'math-6', name: 'Sayı Basamakları', completed: false },
+      { id: 'math-7', name: 'Bölme Bölünebilme', completed: false },
       { id: 'math-8', name: 'EBOB EKOK', completed: false },
       { id: 'math-9', name: 'Rasyonel Sayılar', completed: false },
       { id: 'math-10', name: '1.Dereceden Denklemler', completed: false },
@@ -68,16 +71,16 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Türkçe',
     icon: <BookOpen />,
     color: 'bg-green-500',
-    progress: 25,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'turkish-1', name: 'Sözcükte Anlam', completed: true },
-      { id: 'turkish-2', name: 'Söz Yorumu', completed: true },
-      { id: 'turkish-3', name: 'Deyim ve Atasözü', completed: true },
-      { id: 'turkish-4', name: 'Cümlede Anlam', completed: true },
-      { id: 'turkish-5', name: 'Paragraf', completed: true },
-      { id: 'turkish-6', name: 'Paragrafta Anlatım Teknikleri', completed: true },
-      { id: 'turkish-7', name: 'Paragrafta Düşünceyi Geliştirme Yolları', completed: true },
+      { id: 'turkish-1', name: 'Sözcükte Anlam', completed: false },
+      { id: 'turkish-2', name: 'Söz Yorumu', completed: false },
+      { id: 'turkish-3', name: 'Deyim ve Atasözü', completed: false },
+      { id: 'turkish-4', name: 'Cümlede Anlam', completed: false },
+      { id: 'turkish-5', name: 'Paragraf', completed: false },
+      { id: 'turkish-6', name: 'Paragrafta Anlatım Teknikleri', completed: false },
+      { id: 'turkish-7', name: 'Paragrafta Düşünceyi Geliştirme Yolları', completed: false },
       { id: 'turkish-8', name: 'Paragrafta Yapı', completed: false },
       { id: 'turkish-9', name: 'Paragrafta Konu-Ana Düşünce', completed: false },
       { id: 'turkish-10', name: 'Paragrafta Yardımcı Düşünce', completed: false },
@@ -107,14 +110,14 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Tarih',
     icon: <Globe />,
     color: 'bg-amber-600',
-    progress: 20,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'history-1', name: 'Tarih ve Zaman', completed: true },
-      { id: 'history-2', name: 'İnsanlığın İlk Dönemleri', completed: true },
-      { id: 'history-3', name: 'Ortaçağ\'da Dünya', completed: true },
-      { id: 'history-4', name: 'İlk ve Orta Çağlarda Türk Dünyası', completed: true },
-      { id: 'history-5', name: 'İslam Medeniyetinin Doğuşu', completed: true },
+      { id: 'history-1', name: 'Tarih ve Zaman', completed: false },
+      { id: 'history-2', name: 'İnsanlığın İlk Dönemleri', completed: false },
+      { id: 'history-3', name: 'Ortaçağ\'da Dünya', completed: false },
+      { id: 'history-4', name: 'İlk ve Orta Çağlarda Türk Dünyası', completed: false },
+      { id: 'history-5', name: 'İslam Medeniyetinin Doğuşu', completed: false },
       { id: 'history-6', name: 'İlk Türk İslam Devletleri', completed: false },
       { id: 'history-7', name: 'Yerleşme ve Devletleşme Sürecinde Selçuklu Türkiyesi', completed: false },
       { id: 'history-8', name: 'Beylikten Devlete Osmanlı Siyaseti(1300-1453)', completed: false },
@@ -142,14 +145,14 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Coğrafya',
     icon: <Globe />,
     color: 'bg-emerald-600',
-    progress: 25,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'geography-1', name: 'Doğa ve İnsan', completed: true },
-      { id: 'geography-2', name: 'Dünya\'nın Şekli ve Hareketleri', completed: true },
-      { id: 'geography-3', name: 'Coğrafi Konum', completed: true },
-      { id: 'geography-4', name: 'Harita Bilgisi', completed: true },
-      { id: 'geography-5', name: 'Atmosfer ve Sıcaklık', completed: true },
+      { id: 'geography-1', name: 'Doğa ve İnsan', completed: false },
+      { id: 'geography-2', name: 'Dünya\'nın Şekli ve Hareketleri', completed: false },
+      { id: 'geography-3', name: 'Coğrafi Konum', completed: false },
+      { id: 'geography-4', name: 'Harita Bilgisi', completed: false },
+      { id: 'geography-5', name: 'Atmosfer ve Sıcaklık', completed: false },
       { id: 'geography-6', name: 'İklimler', completed: false },
       { id: 'geography-7', name: 'Basınç ve Rüzgarlar', completed: false },
       { id: 'geography-8', name: 'Nem, Yağış ve Buharlaşma', completed: false },
@@ -171,11 +174,11 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Felsefe',
     icon: <Globe />,
     color: 'bg-indigo-600',
-    progress: 22,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'philosophy-1', name: 'Felsefenin Konusu', completed: true },
-      { id: 'philosophy-2', name: 'Bilgi Felsefesi', completed: true },
+      { id: 'philosophy-1', name: 'Felsefenin Konusu', completed: false },
+      { id: 'philosophy-2', name: 'Bilgi Felsefesi', completed: false },
       { id: 'philosophy-3', name: 'Varlık Felsefesi', completed: false },
       { id: 'philosophy-4', name: 'Din, Kültür ve Medniyet', completed: false },
       { id: 'philosophy-5', name: 'Ahlak Felsefesi', completed: false },
@@ -190,13 +193,13 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Din Kültürü ve Ahlak Bilgisi',
     icon: <Globe />,
     color: 'bg-teal-600',
-    progress: 25,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'religion-1', name: 'İnanç', completed: true },
-      { id: 'religion-2', name: 'İbadet', completed: true },
-      { id: 'religion-3', name: 'Ahlak ve Değerler', completed: true },
-      { id: 'religion-4', name: 'Din, Kültür ve Medniyet', completed: true },
+      { id: 'religion-1', name: 'İnanç', completed: false },
+      { id: 'religion-2', name: 'İbadet', completed: false },
+      { id: 'religion-3', name: 'Ahlak ve Değerler', completed: false },
+      { id: 'religion-4', name: 'Din, Kültür ve Medniyet', completed: false },
       { id: 'religion-5', name: 'Hz. Mhammed (S.A.V.)', completed: false },
       { id: 'religion-6', name: 'Vahiy ve Akıl', completed: false },
       { id: 'religion-7', name: 'Dünya ve Ahiret', completed: false },
@@ -215,12 +218,12 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Fizik',
     icon: <Atom />,
     color: 'bg-blue-600',
-    progress: 30,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'tyt-physics-1', name: 'Fizik Bilimine Giriş', completed: true },
-      { id: 'tyt-physics-2', name: 'Madde ve Özellikleri', completed: true },
-      { id: 'tyt-physics-3', name: 'Sıvıların Kaldırma Kuvveti', completed: true },
+      { id: 'tyt-physics-1', name: 'Fizik Bilimine Giriş', completed: false },
+      { id: 'tyt-physics-2', name: 'Madde ve Özellikleri', completed: false },
+      { id: 'tyt-physics-3', name: 'Sıvıların Kaldırma Kuvveti', completed: false },
       { id: 'tyt-physics-4', name: 'Basınç', completed: false },
       { id: 'tyt-physics-5', name: 'Isı, Sıcaklık ve Genleşme', completed: false },
       { id: 'tyt-physics-6', name: 'Hareket ve Kuvvet', completed: false },
@@ -237,12 +240,12 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Kimya',
     icon: <Beaker />,
     color: 'bg-purple-600',
-    progress: 35,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'tyt-chemistry-1', name: 'Kimya Bilimi', completed: true },
-      { id: 'tyt-chemistry-2', name: 'Atom ve Yapısı', completed: true },
-      { id: 'tyt-chemistry-3', name: 'Periyodik Sistem', completed: true },
+      { id: 'tyt-chemistry-1', name: 'Kimya Bilimi', completed: false },
+      { id: 'tyt-chemistry-2', name: 'Atom ve Yapısı', completed: false },
+      { id: 'tyt-chemistry-3', name: 'Periyodik Sistem', completed: false },
       { id: 'tyt-chemistry-4', name: 'Kimyasal Türler Arası Etkileşimler', completed: false },
       { id: 'tyt-chemistry-5', name: 'Maddenin Halleri', completed: false },
       { id: 'tyt-chemistry-6', name: 'Kimyanın Temel Kanunları', completed: false },
@@ -258,17 +261,16 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Biyoloji',
     icon: <Dna />,
     color: 'bg-green-600',
-    progress: 40,
+    progress: 0,
     category: 'TYT',
     topics: [
-      { id: 'tyt-biology-1', name: 'Canlıların Ortak Özellikleri', completed: true },
-      { id: 'tyt-biology-2', name: 'Canlıların Temel Bileşenleri', completed: true },
-      { id: 'tyt-biology-3', name: 'Hücre ve Organeller – Madde Geçişleri', completed: true },
+      { id: 'tyt-biology-1', name: 'Canlıların Ortak Özellikleri', completed: false },
+      { id: 'tyt-biology-2', name: 'Canlıların Temel Bileşenleri', completed: false },
+      { id: 'tyt-biology-3', name: 'Hücre ve Organeller – Madde Geçişleri', completed: false },
       { id: 'tyt-biology-4', name: 'Canlıların Sınıflandırılması', completed: false },
       { id: 'tyt-biology-5', name: 'Hücrede Bölünme – Üreme', completed: false },
       { id: 'tyt-biology-6', name: 'Kalıtım', completed: false },
-      { id: 'tyt-biology-7', name: 'Bitki Biyolojisi', completed: false },
-      { id: 'tyt-biology-8', name: 'Ekosistem', completed: false }
+      { id: 'tyt-biology-8', name: 'Ekoloji', completed: false }
     ]
   },
   {
@@ -276,17 +278,17 @@ const getInitialSubjects = (): Subject[] => [
     name: 'AYT Matematik',
     icon: <Calculator />,
     color: 'bg-indigo-500',
-    progress: 25,
+    progress: 0,
     category: 'AYT',
     topics: [
-      { id: 'ayt-math-1', name: 'Temel Kavramlar', completed: true },
-      { id: 'ayt-math-2', name: 'Sayı Basamakları', completed: true },
-      { id: 'ayt-math-3', name: 'Bölme ve Bölünebilme', completed: true },
-      { id: 'ayt-math-4', name: 'EBOB - EKOK', completed: true },
-      { id: 'ayt-math-5', name: 'Rasyonel Sayılar', completed: true },
-      { id: 'ayt-math-6', name: 'Basit Eşitsizlikler', completed: true },
-      { id: 'ayt-math-7', name: 'Mutlak Değer', completed: true },
-      { id: 'ayt-math-8', name: 'Üslü Sayılar', completed: true },
+      { id: 'ayt-math-1', name: 'Temel Kavramlar', completed: false },
+      { id: 'ayt-math-2', name: 'Sayı Basamakları', completed: false },
+      { id: 'ayt-math-3', name: 'Bölme ve Bölünebilme', completed: false },
+      { id: 'ayt-math-4', name: 'EBOB - EKOK', completed: false },
+      { id: 'ayt-math-5', name: 'Rasyonel Sayılar', completed: false },
+      { id: 'ayt-math-6', name: 'Basit Eşitsizlikler', completed: false },
+      { id: 'ayt-math-7', name: 'Mutlak Değer', completed: false },
+      { id: 'ayt-math-8', name: 'Üslü Sayılar', completed: false },
       { id: 'ayt-math-9', name: 'Köklü Sayılar', completed: false },
       { id: 'ayt-math-10', name: 'Çarpanlara Ayırma', completed: false },
       { id: 'ayt-math-11', name: 'Oran Orantı', completed: false },
@@ -317,17 +319,17 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Fizik',
     icon: <Atom />,
     color: 'bg-cyan-500',
-    progress: 30,
+    progress: 0,
     category: 'AYT',
     topics: [
-      { id: 'physics-1', name: 'Vektörler', completed: true },
-      { id: 'physics-2', name: 'Kuvvet, Tork ve Denge', completed: true },
-      { id: 'physics-3', name: 'Kütle Merkezi', completed: true },
-      { id: 'physics-4', name: 'Basit Makineler', completed: true },
-      { id: 'physics-5', name: 'Hareket', completed: true },
-      { id: 'physics-6', name: 'Newton\'un Hareket Yasaları', completed: true },
-      { id: 'physics-7', name: 'İş, Güç ve Enerji II', completed: true },
-      { id: 'physics-8', name: 'Atışlar', completed: true },
+      { id: 'physics-1', name: 'Vektörler', completed: false },
+      { id: 'physics-2', name: 'Kuvvet, Tork ve Denge', completed: false },
+      { id: 'physics-3', name: 'Kütle Merkezi', completed: false },
+      { id: 'physics-4', name: 'Basit Makineler', completed: false },
+      { id: 'physics-5', name: 'Hareket', completed: false },
+      { id: 'physics-6', name: 'Newton\'un Hareket Yasaları', completed: false },
+      { id: 'physics-7', name: 'İş, Güç ve Enerji II', completed: false },
+      { id: 'physics-8', name: 'Atışlar', completed: false },
       { id: 'physics-9', name: 'İtme ve Momentum', completed: false },
       { id: 'physics-10', name: 'Elektrik Alan ve Potansiyel', completed: false },
       { id: 'physics-11', name: 'Paralel Levhalar ve Sığa', completed: false },
@@ -352,17 +354,17 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Kimya',
     icon: <Beaker />,
     color: 'bg-orange-500',
-    progress: 35,
+    progress: 0,
     category: 'AYT',
     topics: [
-      { id: 'chemistry-1', name: 'Kimya Bilimi', completed: true },
-      { id: 'chemistry-2', name: 'Atom ve Periyodik Sistem', completed: true },
-      { id: 'chemistry-3', name: 'Kimyasal Türler Arası Etkileşimler', completed: true },
-      { id: 'chemistry-4', name: 'Kimyasal Hesaplamalar', completed: true },
-      { id: 'chemistry-5', name: 'Kimyanın Temel Kanunları', completed: true },
-      { id: 'chemistry-6', name: 'Asit, Baz ve Tuz', completed: true },
-      { id: 'chemistry-7', name: 'Maddenin Halleri', completed: true },
-      { id: 'chemistry-8', name: 'Karışımlar', completed: true },
+      { id: 'chemistry-1', name: 'Kimya Bilimi', completed: false },
+      { id: 'chemistry-2', name: 'Atom ve Periyodik Sistem', completed: false },
+      { id: 'chemistry-3', name: 'Kimyasal Türler Arası Etkileşimler', completed: false },
+      { id: 'chemistry-4', name: 'Kimyasal Hesaplamalar', completed: false },
+      { id: 'chemistry-5', name: 'Kimyanın Temel Kanunları', completed: false },
+      { id: 'chemistry-6', name: 'Asit, Baz ve Tuz', completed: false },
+      { id: 'chemistry-7', name: 'Maddenin Halleri', completed: false },
+      { id: 'chemistry-8', name: 'Karışımlar', completed: false },
       { id: 'chemistry-9', name: 'Doğa ve Kimya', completed: false },
       { id: 'chemistry-10', name: 'Kimya Her Yerde', completed: false },
       { id: 'chemistry-11', name: 'Modern Atom Teorisi', completed: false },
@@ -384,73 +386,188 @@ const getInitialSubjects = (): Subject[] => [
     name: 'Biyoloji',
     icon: <Dna />,
     color: 'bg-emerald-500',
-    progress: 35,
+    progress: 0,
     category: 'AYT',
     topics: [
-      { id: 'biology-1', name: 'Sinir Sistemi', completed: true },
-      { id: 'biology-2', name: 'Endokrin Sistem ve Hormonlar', completed: true },
-      { id: 'biology-3', name: 'Duyu Organları', completed: true },
-      { id: 'biology-4', name: 'Destek ve Hareket Sistemi', completed: true },
-      { id: 'biology-5', name: 'Sindirim Sistemi', completed: true },
-      { id: 'biology-6', name: 'Dolaşım ve Bağışıklık Sistemi', completed: true },
-      { id: 'biology-7', name: 'Solunum Sistemi', completed: true },
+      { id: 'biology-1', name: 'Sinir Sistemi', completed: false },
+      { id: 'biology-2', name: 'Endokrin Sistem ve Hormonlar', completed: false },
+      { id: 'biology-3', name: 'Duyu Organları', completed: false },
+      { id: 'biology-4', name: 'Destek ve Hareket Sistemi', completed: false },
+      { id: 'biology-5', name: 'Sindirim Sistemi', completed: false },
+      { id: 'biology-6', name: 'Dolaşım ve Bağışıklık Sistemi', completed: false },
+      { id: 'biology-7', name: 'Solunum Sistemi', completed: false },
       { id: 'biology-8', name: 'Üriner Sistem (Boşaltım Sistemi)', completed: false },
       { id: 'biology-9', name: 'Üreme Sistemi ve Embriyonik Gelişim', completed: false },
       { id: 'biology-10', name: 'Komünite Ekolojisi', completed: false },
       { id: 'biology-11', name: 'Popülasyon Ekolojisi', completed: false },
-      { id: 'biology-12', name: 'Nükleik Asitler', completed: false },
       { id: 'biology-13', name: 'Genetik Şifre ve Protein Sentezi', completed: false },
       { id: 'biology-14', name: 'Canlılık ve Enerji', completed: false },
-      { id: 'biology-15', name: 'Fotosentez', completed: false },
-      { id: 'biology-16', name: 'Kemosentez', completed: false },
       { id: 'biology-17', name: 'Hücresel Solunum', completed: false },
       { id: 'biology-18', name: 'Bitki Biyolojisi', completed: false },
       { id: 'biology-19', name: 'Canlılar ve Çevre', completed: false }
+    ]
+  },
+  {
+    id: 'literature',
+    name: 'Edebiyat',
+    icon: <BookOpen />,
+    color: 'bg-rose-500',
+    progress: 0,
+    category: 'AYT',
+    topics: [
+      { id: 'literature-1', name: 'Anlam Bilgisi', completed: false },
+      { id: 'literature-2', name: 'Dil Bilgisi', completed: false },
+      { id: 'literature-3', name: 'Güzel Sanatlar ve Edebiyat', completed: false },
+      { id: 'literature-4', name: 'Metinlerin Sınıflandırılması', completed: false },
+      { id: 'literature-5', name: 'Şiir Bilgisi', completed: false },
+      { id: 'literature-6', name: 'Edebi Sanatlar', completed: false },
+      { id: 'literature-7', name: 'Türk Edebiyatı Dönemleri', completed: false },
+      { id: 'literature-8', name: 'İslamiyet Öncesi Türk Edebiyatı ve Geçiş Dönemi', completed: false },
+      { id: 'literature-9', name: 'Halk Edebiyatı', completed: false },
+      { id: 'literature-10', name: 'Divan Edebiyatı', completed: false },
+      { id: 'literature-11', name: 'Tanzimat Edebiyatı', completed: false },
+      { id: 'literature-12', name: 'Servet-i Fünun Edebiyatı', completed: false },
+      { id: 'literature-13', name: 'Fecr-i Ati Edebiyatı', completed: false },
+      { id: 'literature-14', name: 'Milli Edebiyat', completed: false },
+      { id: 'literature-15', name: 'Cumhuriyet Dönemi Edebiyatı', completed: false },
+      { id: 'literature-16', name: 'Edebiyat Akımları', completed: false },
+      { id: 'literature-17', name: 'Dünya Edebiyatı', completed: false }
+    ]
+  },
+  {
+    id: 'ayt-geography',
+    name: 'Coğrafya',
+    icon: <Globe />,
+    color: 'bg-teal-500',
+    progress: 0,
+    category: 'AYT',
+    topics: [
+      { id: 'ayt-geography-1', name: 'Ekosistem', completed: false },
+      { id: 'ayt-geography-2', name: 'İlk Medeniyet ve Şehirler', completed: false },
+      { id: 'ayt-geography-3', name: 'Nüfus Politikaları', completed: false },
+      { id: 'ayt-geography-4', name: 'Göç ve Şehirleşme', completed: false },
+      { id: 'ayt-geography-5', name: 'Türkiye\'nin Jeopolitik Konumu', completed: false },
+      { id: 'ayt-geography-6', name: 'Türkiye Ekonomisi', completed: false },
+      { id: 'ayt-geography-7', name: 'Türkiye\'de Doğal Afetler', completed: false },
+      { id: 'ayt-geography-8', name: 'Türkiye ve Dünyada Bölgeler', completed: false },
+      { id: 'ayt-geography-9', name: 'İklim ve Yer Şekilleri', completed: false },
+      { id: 'ayt-geography-10', name: 'Ülkeler Arası Etkileşim', completed: false },
+      { id: 'ayt-geography-11', name: 'Küresel ve Bölgesel Örgütler', completed: false },
+      { id: 'ayt-geography-12', name: 'Üretim Alanları ve Ulaşım Ağları', completed: false },
+      { id: 'ayt-geography-13', name: 'Ülkeler', completed: false }
     ]
   }
 ];
 
 const SubjectAnalysis: React.FC = () => {
+  const { user } = useAuthStore();
   const [subjects, setSubjects] = useState<Subject[]>(getInitialSubjects());
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [tytExpanded, setTytExpanded] = useState(true);
   const [aytExpanded, setAytExpanded] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedSubjects = localStorage.getItem('subjects');
-    if (savedSubjects) {
-      const parsedSubjects = JSON.parse(savedSubjects);
-      // Merge saved data with initial subjects to restore icons
-      const initialSubjects = getInitialSubjects();
-      const mergedSubjects = parsedSubjects.map((saved: any) => {
-        const initial = initialSubjects.find(s => s.id === saved.id);
-        return {
-          ...initial,
-          ...saved,
-          icon: initial?.icon // Restore the icon from initial data
-        };
-      });
-      setSubjects(mergedSubjects);
+    const loadSubjects = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await getStudentSubjectAnalysis(user.id);
+        
+        if (error) {
+          console.error('Error loading subjects:', error);
+          toast.error('Konu analizi yüklenirken hata oluştu');
+          setLoading(false);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Merge saved data with initial subjects
+          const initialSubjects = getInitialSubjects();
+          const updatedSubjects = initialSubjects.map(subject => {
+            const savedSubject = data.find(s => s.subject_name === subject.name && s.subject_category === subject.category);
+            if (savedSubject) {
+              return {
+                ...subject,
+                progress: savedSubject.progress,
+                topics: subject.topics.map(topic => ({
+                  ...topic,
+                  completed: savedSubject.completed_topics.includes(topic.name)
+                }))
+              };
+            }
+            return subject;
+          });
+          setSubjects(updatedSubjects);
+        }
+      } catch (error) {
+        console.error('Error loading subjects:', error);
+        toast.error('Konu analizi yüklenirken hata oluştu');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSubjects();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const saveSubjects = async () => {
+      if (!user?.id || loading) return;
+
+      try {
+        const subjectsToSave = subjects.map(subject => ({
+          student_id: user.id,
+          subject_name: subject.name,
+          subject_category: subject.category,
+          progress: subject.progress,
+          completed_topics: subject.topics.filter(topic => topic.completed).map(topic => topic.name)
+        }));
+
+        const { error } = await upsertSubjectAnalysis(subjectsToSave);
+        
+        if (error) {
+          console.error('Error saving subjects:', error);
+          toast.error('Konu analizi kaydedilirken hata oluştu');
+        }
+      } catch (error) {
+        console.error('Error saving subjects:', error);
+        toast.error('Konu analizi kaydedilirken hata oluştu');
+      }
+    };
+
+    // Debounce the save operation
+    const timeoutId = setTimeout(saveSubjects, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [subjects, user?.id, loading]);
+
+  const toggleTopic = async (subjectId: string, topicId: string) => {
+    if (!user?.id) {
+      toast.error('Kullanıcı bilgisi bulunamadı');
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    // Save subjects without icons to avoid circular reference
-    const subjectsToSave = subjects.map(({ icon, ...subject }) => subject);
-    localStorage.setItem('subjects', JSON.stringify(subjectsToSave));
-  }, [subjects]);
+    // Find the subject and topic
+    const subject = subjects.find(s => s.id === subjectId);
+    if (!subject) return;
+    
+    const topic = subject.topics.find(t => t.id === topicId);
+    if (!topic) return;
 
-  const toggleTopic = (subjectId: string, topicId: string) => {
+    // Optimistic update
     setSubjects(prevSubjects => 
-      prevSubjects.map(subject => {
-        if (subject.id === subjectId) {
-          const updatedTopics = subject.topics.map(topic => 
-            topic.id === topicId ? { ...topic, completed: !topic.completed } : topic
+      prevSubjects.map(subj => {
+        if (subj.id === subjectId) {
+          const updatedTopics = subj.topics.map(t => 
+            t.id === topicId ? { ...t, completed: !t.completed } : t
           );
-          const completedCount = updatedTopics.filter(topic => topic.completed).length;
+          const completedCount = updatedTopics.filter(t => t.completed).length;
           const progress = Math.round((completedCount / updatedTopics.length) * 100);
           
-          const updatedSubject = { ...subject, topics: updatedTopics, progress };
+          const updatedSubject = { ...subj, topics: updatedTopics, progress };
           
           if (selectedSubject && selectedSubject.id === subjectId) {
             setSelectedSubject(updatedSubject);
@@ -458,9 +575,48 @@ const SubjectAnalysis: React.FC = () => {
           
           return updatedSubject;
         }
-        return subject;
+        return subj;
       })
     );
+
+    try {
+      const { error } = await updateTopicCompletion(
+        user.id,
+        subject.name,
+        subject.category,
+        topic.name,
+        !topic.completed
+      );
+
+      if (error) {
+        console.error('Error updating topic:', error);
+        toast.error('Konu durumu güncellenirken hata oluştu');
+        // Revert optimistic update on error
+        setSubjects(prevSubjects => 
+          prevSubjects.map(subj => {
+            if (subj.id === subjectId) {
+              const revertedTopics = subj.topics.map(t => 
+                t.id === topicId ? { ...t, completed: topic.completed } : t
+              );
+              const completedCount = revertedTopics.filter(t => t.completed).length;
+              const progress = Math.round((completedCount / revertedTopics.length) * 100);
+              
+              const revertedSubject = { ...subj, topics: revertedTopics, progress };
+              
+              if (selectedSubject && selectedSubject.id === subjectId) {
+                setSelectedSubject(revertedSubject);
+              }
+              
+              return revertedSubject;
+            }
+            return subj;
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Error updating topic:', error);
+      toast.error('Konu durumu güncellenirken hata oluştu');
+    }
   };
 
   const getOverallProgress = () => {
