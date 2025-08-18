@@ -55,6 +55,37 @@ const StudentSignIn: React.FC = () => {
         return;
       }
 
+      // Supabase Auth ile öğrenci giriş yapmak için özel token oluştur
+      // Öğrenci ID'sini JWT token'ın sub claim'ine yerleştir
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: `student_${student.id}@internal.app`,
+        password: student.id // Öğrenci ID'sini password olarak kullan
+      });
+
+      if (authError) {
+        // Eğer kullanıcı yoksa, oluştur
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: `student_${student.id}@internal.app`,
+          password: student.id,
+          options: {
+            data: {
+              student_id: student.id,
+              name: student.name,
+              email: student.email,
+              user_type: 'student'
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error('Auth signup error:', signUpError);
+          setError('Kimlik doğrulama hatası.');
+          return;
+        }
+
+        console.log('Student auth account created:', signUpData);
+      }
+
       // Başarılı giriş
       console.log('Login successful');
       setUser({ id: student.id, email: student.email, name: student.name });

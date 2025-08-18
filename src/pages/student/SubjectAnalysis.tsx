@@ -527,6 +527,9 @@ const SubjectAnalysis: React.FC = () => {
           progress: subject.progress
         }));
 
+        console.log('Saving subjects with user.id:', user.id);
+        console.log('Subjects to save:', subjectsToSave);
+
         const { error } = await bulkUpsertSubjectAnalysis(user.id, subjectsToSave);
         
         if (error) {
@@ -580,6 +583,13 @@ const SubjectAnalysis: React.FC = () => {
     );
 
     try {
+      console.log('Updating topic with params:', {
+        studentId: user.id,
+        subjectId: subject.id,
+        topicName: topic.name,
+        isCompleted: !topic.completed
+      });
+
       const { error } = await updateTopicCompletion(
         user.id,
         subject.id,

@@ -28,25 +28,29 @@ ALTER TABLE student_subject_analysis ENABLE ROW LEVEL SECURITY;
 -- Students can view their own subject analysis
 CREATE POLICY "Students can view their own subject analysis" ON student_subject_analysis
   FOR SELECT USING (
-    student_id::text = auth.jwt() ->> 'sub'
+    student_id::text = (auth.jwt() ->> 'student_id') OR 
+    student_id::text = auth.uid()::text
   );
 
 -- Students can insert their own subject analysis
 CREATE POLICY "Students can insert their own subject analysis" ON student_subject_analysis
   FOR INSERT WITH CHECK (
-    student_id::text = auth.jwt() ->> 'sub'
+    student_id::text = (auth.jwt() ->> 'student_id') OR 
+    student_id::text = auth.uid()::text
   );
 
 -- Students can update their own subject analysis
 CREATE POLICY "Students can update their own subject analysis" ON student_subject_analysis
   FOR UPDATE USING (
-    student_id::text = auth.jwt() ->> 'sub'
+    student_id::text = (auth.jwt() ->> 'student_id') OR 
+    student_id::text = auth.uid()::text
   );
 
 -- Students can delete their own subject analysis
 CREATE POLICY "Students can delete their own subject analysis" ON student_subject_analysis
   FOR DELETE USING (
-    student_id::text = auth.jwt() ->> 'sub'
+    student_id::text = (auth.jwt() ->> 'student_id') OR 
+    student_id::text = auth.uid()::text
   );
 
 -- Coaches can view subject analysis of their students
